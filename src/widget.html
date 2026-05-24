@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="/run/nest-egg/" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--hub-font, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+      font-size: var(--hub-font-size, 14px);
+      background: var(--hub-surface, #fff);
+      color: var(--hub-text, #111827);
+      padding: 12px 14px;
+      height: 100%;
+    }
+    .label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--hub-text-muted, #6b7280); margin-bottom: 2px; }
+    .amount { font-size: 1.5rem; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; }
+    .amount.positive { color: #16a34a; }
+    .amount.negative { color: #dc2626; }
+    .trend { display: inline-flex; align-items: center; gap: 3px; font-size: 0.72rem; font-weight: 600; padding: 1px 6px; border-radius: 12px; margin-top: 4px; }
+    .trend.up   { background: #dcfce7; color: #16a34a; }
+    .trend.down { background: #fee2e2; color: #dc2626; }
+    .trend.flat { background: var(--hub-border, #e5e7eb); color: var(--hub-text-muted, #6b7280); }
+    .goal-name { font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .progress-bar { height: 5px; background: var(--hub-border, #e5e7eb); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--hub-primary, #111827); border-radius: 3px; }
+    .progress-fill.complete { background: #16a34a; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--hub-text-muted, #6b7280); margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="module">
+  import { isAdult, fmtMoney, fmtMoneyShort } from "/hub-sdk.js";
+  import { calcNetWorth, calcTrend, latestOf, buildNetWorthHistory } from "./logic.js";
+
+  const CONTEXT = window.__CONTEXT_URL ?? "";
+  const DB      = window.__DB_URL      ?? "";
+  const ME      = window.__CURRENT_MEMBER ?? null;
+
+  async function db(sql, params = []) {
+    if (!DB) return { rows: [] };
+    const res = await fetch(DB, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sql, params }) });
+    return res.json();
+  }
+
+  function renderAdult(accounts, snapshots) {
+    const enriched = accounts.map(a => {
+      const snaps  = snapshots.filter(s => s.account_id === a.id);
+      const latest = latestOf(snaps);
+      return { ...a, latestCents: latest?.value_cents ?? 0 };
+    });
+    const { netWorth } = calcNetWorth(enriched);
+    const history = buildNetWorthHistory(accounts, snapshots);
+    const trend   = history.length >= 2 ? calcTrend(history[history.length - 1].netWorth, history[history.length - 2].netWorth) : null;
+    const nwClass = netWorth > 0 ? "positive" : netWorth < 0 ? "negative" : "";
+    const trendLabel = !trend ? "" : trend.delta === 0 ? "No change" : `${trend.delta > 0 ? "+" : ""}${fmtMoney(trend.delta)}`;
+    const trendHtml = trend
+      ? `<div class="trend ${trend.direction}">${trend.direction === "up" ? "▲" : trend.direction === "down" ? "▼" : "—"} ${trendLabel}</div>`
+      : "";
+    document.getElementById("root").innerHTML = `
+      <div class="label">Net Worth</div>
+      <div class="amount ${nwClass}">${fmtMoneyShort(netWorth)}</div>
+      ${trendHtml}`;
+  }
+
+  function renderKid(goals, goalSnapshots) {
+    const myGoals = goals.filter(g => g.member_id === ME?.id || g.visibility === "everyone");
+    if (!myGoals.length) {
+      document.getElementById("root").innerHTML = `<div class="label">Savings Goals</div><div style="font-size:.82rem;color:var(--hub-text-muted,#6b7280);margin-top:4px">No goals yet</div>`;
+      return;
+    }
+    // Pick the goal closest to completion (highest progress)
+    const withProgress = myGoals.map(g => {
+      const snaps  = goalSnapshots.filter(s => s.goal_id === g.id);
+      const latest = latestOf(snaps);
+      const balance = latest?.balance_cents ?? 0;
+      return { ...g, balance, progress: g.target_cents > 0 ? balance / g.target_cents : 0 };
+    });
+    withProgress.sort((a, b) => b.progress - a.progress);
+    const top = withProgress[0];
+    const pct = Math.round(Math.min(top.progress, 1) * 100);
+    document.getElementById("root").innerHTML = `
+      <div class="label">Savings Goal</div>
+      <div class="goal-name">${top.name}</div>
+      <div class="progress-bar"><div class="progress-fill ${pct >= 100 ? "complete" : ""}" style="width:${pct}%"></div></div>
+      <div class="progress-label"><span>${fmtMoney(top.balance)}</span><span>${fmtMoney(top.target_cents)}</span></div>`;
+  }
+
+  (async () => {
+    if (!ME) { document.getElementById("root").innerHTML = `<div class="label">Nest Egg</div>`; return; }
+
+    if (isAdult(ME)) {
+      const [a, as_] = await Promise.all([
+        db(`SELECT * FROM accounts WHERE archived_at IS NULL`),
+        db(`SELECT * FROM account_snapshots ORDER BY recorded_at DESC LIMIT 200`),
+      ]);
+      renderAdult(a.rows ?? [], as_.rows ?? []);
+    } else {
+      const [g, gs_] = await Promise.all([
+        db(`SELECT * FROM savings_goals`),
+        db(`SELECT * FROM goal_snapshots ORDER BY recorded_at DESC LIMIT 200`),
+      ]);
+      renderKid(g.rows ?? [], gs_.rows ?? []);
+    }
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "id": "nest-egg",
+  "name": "Nest Egg",
+  "version": "1.0.0",
+  "description": "Household financial overview — track net worth, savings goals, and named funds over time. Adults manage assets and liabilities; kids see their savings goals.",
+  "entrypoint": "index.html",
+  "runtime": "static",
+  "category": "family",
+  "tags": ["finance", "net-worth", "savings", "goals", "household"],
+  "data_access": {
+    "reads": ["family.members"],
+    "writes": []
+  },
+  "permissions": {
+    "default_audience": "everyone",
+    "requires_approval": false
+  },
+  "storage": "db",
+  "publishes": ["nest-egg.goal-reached"],
+  "nav": { "label": "Nest Egg" },
+  "widget": { "label": "Nest Egg", "size": "small" },
+  "resource_limits": { "max_db_bytes": 104857600 },
+  "icon": "🪺"
+}

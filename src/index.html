@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nest Egg</title>
+  <base href="/run/nest-egg/" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           var(--hub-bg, #f9fafb);
+      --card:         var(--hub-surface, #ffffff);
+      --border:       var(--hub-border, #e5e7eb);
+      --text:         var(--hub-text, #111827);
+      --muted:        var(--hub-text-muted, #6b7280);
+      --accent:       var(--hub-primary, #111827);
+      --accent-fg:    var(--hub-primary-fg, #ffffff);
+      --accent-hover: var(--hub-primary-hover, #374151);
+      --radius:       var(--hub-radius, 0.5rem);
+      --shadow:       0 1px 3px rgba(0,0,0,.07);
+      --green:  #16a34a; --green-light:  #dcfce7;
+      --blue:   #2563eb; --blue-light:   #dbeafe;
+      --red:    #dc2626; --red-light:    #fee2e2;
+    }
+
+    body {
+      font-family: var(--hub-font, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; font-size: var(--hub-font-size, 15px); line-height: 1.5;
+    }
+
+    .app { max-width: 640px; margin: 0 auto; padding: 16px; }
+
+    /* ── Header ────────────────────────────────────────── */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; padding: 14px 18px;
+      background: var(--accent); border-radius: var(--radius); color: var(--accent-fg);
+    }
+    header h1 { font-size: 1.2rem; font-weight: 700; }
+    header .sub { font-size: 0.8rem; opacity: .75; margin-top: 1px; }
+
+    /* ── Tabs ──────────────────────────────────────────── */
+    .tabs { display: flex; gap: 4px; margin-bottom: 18px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
+    .tab { flex: 1; text-align: center; padding: 7px 12px; border-radius: calc(var(--radius) - 2px); font-size: 0.875rem; font-weight: 600; cursor: pointer; border: none; background: transparent; color: var(--muted); transition: all .12s; }
+    .tab.active { background: var(--accent); color: var(--accent-fg); }
+    .tab:not(.active):hover { background: var(--bg); color: var(--text); }
+
+    /* ── Buttons ───────────────────────────────────────── */
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 0.875rem; font-weight: 600; cursor: pointer; border: none; transition: opacity .15s; }
+    .btn:disabled { opacity: .5; cursor: default; }
+    .btn-primary { background: var(--accent); color: var(--accent-fg); }
+    .btn-primary:hover:not(:disabled) { opacity: .88; }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+    .btn-danger { background: var(--red); color: white; }
+    .btn-danger:hover:not(:disabled) { opacity: .88; }
+    .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+
+    /* ── Net worth hero ────────────────────────────────── */
+    .nw-hero {
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 20px 22px; margin-bottom: 18px;
+      box-shadow: var(--shadow);
+    }
+    .nw-hero .label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+    .nw-hero .amount { font-size: 2.4rem; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+    .nw-hero .amount.positive { color: var(--green); }
+    .nw-hero .amount.negative { color: var(--red); }
+    .nw-hero .amount.zero     { color: var(--muted); }
+    .nw-hero .breakdown { display: flex; gap: 24px; margin-top: 10px; font-size: 0.85rem; }
+    .nw-hero .breakdown span { color: var(--muted); }
+    .nw-hero .breakdown strong { color: var(--text); }
+    .nw-trend { display: inline-flex; align-items: center; gap: 4px; font-size: 0.8rem; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-top: 6px; }
+    .nw-trend.up   { background: var(--green-light); color: var(--green); }
+    .nw-trend.down { background: var(--red-light);   color: var(--red);   }
+    .nw-trend.flat { background: var(--border);       color: var(--muted); }
+
+    /* ── Section header ────────────────────────────────── */
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin: 20px 0 10px; }
+    .section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+
+    /* ── Item cards ────────────────────────────────────── */
+    .item-card {
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+      box-shadow: var(--shadow); display: flex; align-items: flex-start; gap: 12px;
+      flex-wrap: wrap;
+    }
+    .item-icon { font-size: 1.4rem; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+    .item-body { flex: 1; min-width: 0; }
+    .item-name { font-weight: 700; font-size: 0.95rem; }
+    .item-sub  { font-size: 0.78rem; color: var(--muted); margin-top: 1px; }
+    .item-right { text-align: right; flex-shrink: 0; }
+    .item-amount { font-size: 1.2rem; font-weight: 800; }
+    .item-amount.asset     { color: var(--green); }
+    .item-amount.liability { color: var(--red); }
+    .item-actions { display: flex; gap: 6px; margin-top: 6px; justify-content: flex-end; }
+    .item-progress { flex-basis: 100%; margin-top: 8px; }
+
+    /* ── Progress bar ──────────────────────────────────── */
+    .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s; }
+    .progress-fill.complete { background: var(--green); }
+    .progress-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
+
+    /* ── Member avatar ─────────────────────────────────── */
+    .avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: white; flex-shrink: 0; }
+    .member-row { display: flex; align-items: center; gap: 8px; margin: 18px 0 8px; }
+    .member-row .name { font-weight: 700; font-size: 0.9rem; }
+
+    /* ── Badges ────────────────────────────────────────── */
+    .vis-badge { font-size: 0.68rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-left: 4px; }
+    .vis-badge.everyone { background: var(--blue-light); color: var(--blue); }
+    .vis-badge.adults   { background: var(--border);     color: var(--muted); }
+    .achieved-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 0.72rem; font-weight: 700; background: var(--green-light); color: var(--green); padding: 2px 8px; border-radius: 20px; margin-top: 4px; }
+
+    /* ── Modal ─────────────────────────────────────────── */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center; z-index: 100; }
+    @media (min-width: 520px) { .modal-backdrop { align-items: center; padding: 20px; } }
+    .modal { background: var(--card); border-radius: var(--radius) var(--radius) 0 0; width: 100%; max-width: 480px; padding: 22px; max-height: 90vh; overflow-y: auto; }
+    @media (min-width: 520px) { .modal { border-radius: var(--radius); } }
+    .modal h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .04em; }
+    .form-group input, .form-group select {
+      width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 12px;
+      font-size: 0.95rem; outline: none; transition: border-color .15s; background: var(--card); color: var(--text); font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+    .input-prefix { position: relative; }
+    .input-prefix .prefix { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; pointer-events: none; }
+    .input-prefix input { padding-left: 24px; }
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-group { flex: 1; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+    .modal-actions .btn { flex: 1; justify-content: center; min-width: 80px; }
+
+    /* ── Misc ──────────────────────────────────────────── */
+    .empty { text-align: center; padding: 36px 16px; color: var(--muted); font-size: 0.9rem; }
+    .loading { text-align: center; padding: 40px; color: var(--muted); }
+    .add-row { padding: 10px 0 4px; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div id="root"><div class="loading">Loading…</div></div>
+</div>
+
+<script type="module">
+import { memberColor, initial, esc, isAdult, hubConfirm, fmtMoney, fmtMoneyShort } from "/hub-sdk.js";
+import {
+  calcNetWorth, calcProgress, calcTrend,
+  fmtMonthYear, fmtDate,
+  latestOf, buildNetWorthHistory,
+  categoryIcon, categoryLabel,
+} from "./logic.js";
+
+const CONTEXT    = window.__CONTEXT_URL    ?? "";
+const DB         = window.__DB_URL         ?? "";
+const EVENTS_URL = window.__EVENTS_URL     ?? "/api/events";
+const APP_ID     = window.__APP_ID         ?? "nest-egg";
+const ME         = window.__CURRENT_MEMBER ?? null;
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let members       = [];
+let accounts      = [];
+let acctSnapshots = [];
+let funds         = [];
+let fundSnapshots = [];
+let goals         = [];
+let goalSnapshots = [];
+let activeTab     = "networth";
+
+// ── DB helper ─────────────────────────────────────────────────────────────────
+async function db(sql, params = []) {
+  if (!DB) return { rows: [] };
+  const res = await fetch(DB, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sql, params }) });
+  return res.json();
+}
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function loadMembers() {
+  if (!CONTEXT) {
+    members = [
+      { id: "demo-1", name: "Alex",   role: "adult" },
+      { id: "demo-2", name: "Jordan", role: "adult" },
+      { id: "demo-3", name: "Casey",  role: "child" },
+    ];
+    return;
+  }
+  try {
+    const res = await fetch(`${CONTEXT}?keys=family.members`);
+    members = ((await res.json())["family.members"]) ?? [];
+  } catch { members = []; }
+}
+
+async function loadAll() {
+  if (!DB) { loadDemoData(); return; }
+  const [a, as_, f, fs_, g, gs_] = await Promise.all([
+    db(`SELECT * FROM accounts   WHERE archived_at IS NULL ORDER BY type, category`),
+    db(`SELECT * FROM account_snapshots ORDER BY recorded_at DESC LIMIT 500`),
+    db(`SELECT * FROM funds       WHERE archived_at IS NULL ORDER BY name`),
+    db(`SELECT * FROM fund_snapshots    ORDER BY recorded_at DESC LIMIT 500`),
+    db(`SELECT * FROM savings_goals ORDER BY member_id, created_at`),
+    db(`SELECT * FROM goal_snapshots    ORDER BY recorded_at DESC LIMIT 500`),
+  ]);
+  accounts      = a.rows   ?? [];
+  acctSnapshots = as_.rows ?? [];
+  funds         = f.rows   ?? [];
+  fundSnapshots = fs_.rows ?? [];
+  goals         = g.rows   ?? [];
+  goalSnapshots = gs_.rows ?? [];
+}
+
+function loadDemoData() {
+  const mo1 = "2025-01-15T00:00:00.000Z";
+  const mo2 = "2025-03-20T00:00:00.000Z";
+  const mo3 = new Date().toISOString();
+  accounts = [
+    { id: "a1", name: "Primary Home",    category: "home",       type: "asset",     archived_at: null, created_at: mo1 },
+    { id: "a2", name: "401(k)",           category: "investment", type: "asset",     archived_at: null, created_at: mo1 },
+    { id: "a3", name: "Savings Account",  category: "savings",    type: "asset",     archived_at: null, created_at: mo1 },
+    { id: "a4", name: "Toyota Camry",     category: "vehicle",    type: "asset",     archived_at: null, created_at: mo1 },
+    { id: "l1", name: "Mortgage",         category: "mortgage",   type: "liability", archived_at: null, created_at: mo1 },
+    { id: "l2", name: "Car Loan",         category: "auto_loan",  type: "liability", archived_at: null, created_at: mo1 },
+  ];
+  acctSnapshots = [
+    { id: "as1",  account_id: "a1", value_cents: 42000000, note: "",              recorded_by: "demo-1", recorded_at: mo1 },
+    { id: "as2",  account_id: "a2", value_cents:  7800000, note: "",              recorded_by: "demo-1", recorded_at: mo1 },
+    { id: "as3",  account_id: "a3", value_cents:  2400000, note: "",              recorded_by: "demo-1", recorded_at: mo1 },
+    { id: "as4",  account_id: "a4", value_cents:  2200000, note: "",              recorded_by: "demo-1", recorded_at: mo1 },
+    { id: "as5",  account_id: "l1", value_cents: 31500000, note: "",              recorded_by: "demo-1", recorded_at: mo1 },
+    { id: "as6",  account_id: "l2", value_cents:  1400000, note: "",              recorded_by: "demo-1", recorded_at: mo1 },
+    { id: "as7",  account_id: "a1", value_cents: 43000000, note: "Zillow est.",  recorded_by: "demo-1", recorded_at: mo2 },
+    { id: "as8",  account_id: "a2", value_cents:  8500000, note: "Q1 statement", recorded_by: "demo-1", recorded_at: mo2 },
+    { id: "as9",  account_id: "a3", value_cents:  2800000, note: "",              recorded_by: "demo-1", recorded_at: mo2 },
+    { id: "as10", account_id: "l1", value_cents: 31200000, note: "",              recorded_by: "demo-1", recorded_at: mo2 },
+    { id: "as11", account_id: "l2", value_cents:  1100000, note: "",              recorded_by: "demo-1", recorded_at: mo2 },
+  ];
+  funds = [
+    { id: "f1", name: "Emergency Fund",      target_cents: 1500000, archived_at: null, created_at: mo1 },
+    { id: "f2", name: "Vacation Fund",       target_cents:  500000, archived_at: null, created_at: mo1 },
+    { id: "f3", name: "Home Repair Reserve", target_cents:      null, archived_at: null, created_at: mo1 },
+  ];
+  fundSnapshots = [
+    { id: "fs1", fund_id: "f1", balance_cents: 1200000, note: "", recorded_by: "demo-1", recorded_at: mo1 },
+    { id: "fs2", fund_id: "f2", balance_cents:  180000, note: "", recorded_by: "demo-1", recorded_at: mo1 },
+    { id: "fs3", fund_id: "f3", balance_cents:  350000, note: "", recorded_by: "demo-1", recorded_at: mo1 },
+    { id: "fs4", fund_id: "f1", balance_cents: 1350000, note: "", recorded_by: "demo-1", recorded_at: mo2 },
+    { id: "fs5", fund_id: "f2", balance_cents:  320000, note: "", recorded_by: "demo-1", recorded_at: mo2 },
+  ];
+  goals = [
+    { id: "g1", member_id: "demo-3", name: "New Bike",           target_cents:  25000, target_date: "2025-08-01", visibility: "everyone", achieved_at: null, created_at: mo1 },
+    { id: "g2", member_id: "demo-2", name: "iPad Pro",           target_cents: 100000, target_date: null,          visibility: "adults",   achieved_at: null, created_at: mo1 },
+    { id: "g3", member_id: "demo-1", name: "Family Vacation",    target_cents: 400000, target_date: "2025-12-01", visibility: "everyone", achieved_at: null, created_at: mo2 },
+  ];
+  goalSnapshots = [
+    { id: "gs1", goal_id: "g1", balance_cents: 18000, note: "Saved from chores", recorded_by: "demo-3", recorded_at: mo1 },
+    { id: "gs2", goal_id: "g2", balance_cents: 45000, note: "",                   recorded_by: "demo-2", recorded_at: mo1 },
+    { id: "gs3", goal_id: "g3", balance_cents: 80000, note: "",                   recorded_by: "demo-1", recorded_at: mo2 },
+    { id: "gs4", goal_id: "g1", balance_cents: 21500, note: "",                   recorded_by: "demo-3", recorded_at: mo3 },
+  ];
+}
+
+// ── Computed helpers ──────────────────────────────────────────────────────────
+function accountWithLatest(acct) {
+  const snaps  = acctSnapshots.filter(s => s.account_id === acct.id);
+  const latest = latestOf(snaps);
+  return { ...acct, latestCents: latest?.value_cents ?? 0, latestSnap: latest };
+}
+function fundWithLatest(fund) {
+  const snaps  = fundSnapshots.filter(s => s.fund_id === fund.id);
+  const latest = latestOf(snaps);
+  return { ...fund, latestCents: latest?.balance_cents ?? 0, latestSnap: latest };
+}
+function goalWithLatest(goal) {
+  const snaps  = goalSnapshots.filter(s => s.goal_id === goal.id);
+  const latest = latestOf(snaps);
+  return { ...goal, latestCents: latest?.balance_cents ?? 0, latestSnap: latest };
+}
+
+// ── Events ────────────────────────────────────────────────────────────────────
+async function publishGoalReached(goal) {
+  await fetch(EVENTS_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      source_app_id: APP_ID,
+      type: "nest-egg.goal-reached",
+      subject_id: goal.member_id,
+      payload: { goal_id: goal.id, goal_name: goal.name, target_cents: goal.target_cents },
+    }),
+  }).catch(() => {});
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────────
+let modalEl = null;
+function openModal(html) {
+  closeModal();
+  modalEl = document.createElement("div");
+  modalEl.className = "modal-backdrop";
+  modalEl.innerHTML = `<div class="modal">${html}</div>`;
+  modalEl.addEventListener("click", e => { if (e.target === modalEl) closeModal(); });
+  document.body.appendChild(modalEl);
+}
+function closeModal() { modalEl?.remove(); modalEl = null; }
+window.closeModal = closeModal;
+
+// ── Account actions ───────────────────────────────────────────────────────────
+function assetCategoryOptions(selected) {
+  return ["home","investment","savings","checking","vehicle","other_asset"]
+    .map(c => `<option value="${c}"${c === selected ? " selected" : ""}>${categoryLabel(c)}</option>`).join("");
+}
+function liabilityCategoryOptions(selected) {
+  return ["mortgage","auto_loan","student_loan","credit_card","other_liability"]
+    .map(c => `<option value="${c}"${c === selected ? " selected" : ""}>${categoryLabel(c)}</option>`).join("");
+}
+window.onTypeChange = function() {
+  const type = document.getElementById("f-type")?.value;
+  const sel  = document.getElementById("f-category");
+  if (sel) sel.innerHTML = type === "asset" ? assetCategoryOptions() : liabilityCategoryOptions();
+};
+
+function openAddAccountModal() {
+  openModal(`
+    <h3>Add Account</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Type</label>
+        <select id="f-type" onchange="onTypeChange()">
+          <option value="asset">Asset</option>
+          <option value="liability">Liability</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="f-category">${assetCategoryOptions()}</select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Name</label>
+      <input id="f-name" type="text" placeholder="e.g. Primary Home, 401(k)" autofocus />
+    </div>
+    <div class="form-group">
+      <label>Current value</label>
+      <div class="input-prefix"><span class="prefix">$</span>
+        <input id="f-value" type="number" min="0" step="1" placeholder="0" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddAccount()">Add</button>
+    </div>`);
+}
+
+window.submitAddAccount = async function() {
+  const name = document.getElementById("f-name")?.value.trim();
+  if (!name) { document.getElementById("f-name")?.focus(); return; }
+  const type     = document.getElementById("f-type")?.value;
+  const category = document.getElementById("f-category")?.value;
+  const rawVal   = parseFloat(document.getElementById("f-value")?.value ?? "0") || 0;
+  const cents    = Math.round(rawVal * 100);
+
+  const btn = modalEl?.querySelector(".btn-primary");
+  if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
+  try {
+    const id = crypto.randomUUID(), now = new Date().toISOString();
+    await db(`INSERT INTO accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, ?)`, [id, name, category, type, now]);
+    if (cents > 0) {
+      await db(`INSERT INTO account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
+        [crypto.randomUUID(), id, cents, ME?.id ?? "system", now]);
+    }
+    await loadAll(); closeModal(); render();
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = "Add"; }
+    throw e;
+  }
+};
+
+function openUpdateAccountModal(acctId) {
+  const acct = accounts.find(a => a.id === acctId); if (!acct) return;
+  const wa = accountWithLatest(acct);
+  openModal(`
+    <h3>${categoryIcon(acct.category)} Update ${esc(acct.name)}</h3>
+    <div style="font-size:.85rem;color:var(--muted);margin-bottom:14px">
+      Current: <strong>${fmtMoney(wa.latestCents)}</strong>${wa.latestSnap ? ` · ${fmtDate(wa.latestSnap.recorded_at)}` : ""}
+    </div>
+    <div class="form-group">
+      <label>New value</label>
+      <div class="input-prefix"><span class="prefix">$</span>
+        <input id="f-value" type="number" min="0" step="1" placeholder="${wa.latestCents / 100 || 0}" autofocus />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Note <span style="font-weight:400;text-transform:none">(optional)</span></label>
+      <input id="f-note" type="text" placeholder="e.g. Zillow estimate, Q2 statement" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger btn-sm" onclick="archiveAccount('${acctId}')" style="flex:0">Remove</button>
+      <button class="btn btn-primary" onclick="submitUpdateAccount('${acctId}')">Update</button>
+    </div>`);
+}
+
+window.submitUpdateAccount = async function(acctId) {
+  const rawVal = parseFloat(document.getElementById("f-value")?.value ?? "");
+  if (isNaN(rawVal) || rawVal < 0) { document.getElementById("f-value")?.focus(); return; }
+  const note = document.getElementById("f-note")?.value.trim() ?? "";
+  const btn  = modalEl?.querySelector(".btn-primary");
+  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+  try {
+    const now = new Date().toISOString();
+    await db(`INSERT INTO account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
+      [crypto.randomUUID(), acctId, Math.round(rawVal * 100), note, ME?.id ?? "system", now]);
+    await loadAll(); closeModal(); render();
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = "Update"; }
+    throw e;
+  }
+};
+
+window.archiveAccount = async function(acctId) {
+  if (!await hubConfirm({ message: "Remove this account?", description: "Historical snapshots are kept. You can re-add it later.", confirmLabel: "Remove", destructive: true })) return;
+  closeModal();
+  await db(`UPDATE accounts SET archived_at = ? WHERE id = ?`, [new Date().toISOString(), acctId]);
+  await loadAll(); render();
+};
+
+// ── Fund actions ──────────────────────────────────────────────────────────────
+function openAddFundModal() {
+  openModal(`
+    <h3>Add Fund</h3>
+    <div class="form-group">
+      <label>Name</label>
+      <input id="f-name" type="text" placeholder="e.g. Emergency Fund, Vacation" autofocus />
+    </div>
+    <div class="form-group">
+      <label>Current balance</label>
+      <div class="input-prefix"><span class="prefix">$</span>
+        <input id="f-balance" type="number" min="0" step="1" placeholder="0" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Target <span style="font-weight:400;text-transform:none">(optional)</span></label>
+      <div class="input-prefix"><span class="prefix">$</span>
+        <input id="f-target" type="number" min="0" step="1" placeholder="Leave blank for no target" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddFund()">Add</button>
+    </div>`);
+}
+
+window.submitAddFund = async function() {
+  const name = document.getElementById("f-name")?.value.trim();
+  if (!name) { document.getElementById("f-name")?.focus(); return; }
+  const rawBal    = parseFloat(document.getElementById("f-balance")?.value ?? "0") || 0;
+  const rawTarget = parseFloat(document.getElementById("f-target")?.value  ?? "");
+  const balCents  = Math.round(rawBal * 100);
+  const targetCents = isNaN(rawTarget) || rawTarget <= 0 ? null : Math.round(rawTarget * 100);
+  const btn = modalEl?.querySelector(".btn-primary");
+  if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
+  try {
+    const id = crypto.randomUUID(), now = new Date().toISOString();
+    await db(`INSERT INTO funds (id, name, target_cents, created_at) VALUES (?, ?, ?, ?)`, [id, name, targetCents, now]);
+    if (balCents > 0) {
+      await db(`INSERT INTO fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
+        [crypto.randomUUID(), id, balCents, ME?.id ?? "system", now]);
+    }
+    await loadAll(); closeModal(); render();
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = "Add"; }
+    throw e;
+  }
+};
+
+function openUpdateFundModal(fundId) {
+  const fund = funds.find(f => f.id === fundId); if (!fund) return;
+  const wf = fundWithLatest(fund);
+  openModal(`
+    <h3>💰 Update ${esc(fund.name)}</h3>
+    <div style="font-size:.85rem;color:var(--muted);margin-bottom:14px">
+      Current: <strong>${fmtMoney(wf.latestCents)}</strong>${wf.latestSnap ? ` · ${fmtDate(wf.latestSnap.recorded_at)}` : ""}
+    </div>
+    <div class="form-group">
+      <label>New balance</label>
+      <div class="input-prefix"><span class="prefix">$</span>
+        <input id="f-balance" type="number" min="0" step="1" placeholder="${wf.latestCents / 100 || 0}" autofocus />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Target <span style="font-weight:400;text-transform:none">(optional)</span></label>
+      <div class="input-prefix"><span class="prefix">$</span>
+        <input id="f-target" type="number" min="0" step="1" value="${fund.target_cents ? fund.target_cents / 100 : ""}" placeholder="Leave blank for no target" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Note <span style="font-weight:400;text-transform:none">(optional)</span></label>
+      <input id="f-note" type="text" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger btn-sm" onclick="archiveFund('${fundId}')" style="flex:0">Remove</button>
+      <button class="btn btn-primary" onclick="submitUpdateFund('${fundId}')">Update</button>
+    </div>`);
+}
+
+window.submitUpdateFund = async function(fundId) {
+  const rawBal    = parseFloat(document.getElementById("f-balance")?.value ?? "");
+  if (isNaN(rawBal) || rawBal < 0) { document.getElementById("f-balance")?.focus(); return; }
+  const rawTarget = parseFloat(document.getElementById("f-target")?.value ?? "");
+  const note      = document.getElementById("f-note")?.value.trim() ?? "";
+  const balCents  = Math.round(rawBal * 100);
+  const targetCents = isNaN(rawTarget) || rawTarget <= 0 ? null : Math.round(rawTarget * 100);
+  const btn = modalEl?.querySelector(".btn-primary");
+  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+  try {
+    const now = new Date().toISOString();
+    await Promise.all([
+      db(`UPDATE funds SET target_cents = ? WHERE id = ?`, [targetCents, fundId]),
+      db(`INSERT INTO fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
+        [crypto.randomUUID(), fundId, balCents, note, ME?.id ?? "system", now]),
+    ]);
+    await loadAll(); closeModal(); render();
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = "Update"; }
+    throw e;
+  }
+};
+
+window.archiveFund = async function(fundId) {
+  if (!await hubConfirm({ message: "Remove this fund?", description: "History is kept.", confirmLabel: "Remove", destructive: true })) return;
+  closeModal();
+  await db(`UPDATE funds SET archived_at = ? WHERE id = ?`, [new Date().toISOString(), fundId]);
+  await loadAll(); render();
+};
+
+// ── Goal actions ──────────────────────────────────────────────────────────────
+function openAddGoalModal() {
+  const memberOptions = members.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join("");
+  openModal(`
+    <h3>Add Savings Goal</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>For</label>
+        <select id="f-member">${memberOptions}</select>
+      </div>
+      <div class="form-group">
+        <label>Visible to</label>
+        <select id="f-vis">
+          <option value="adults">Adults only</option>
+          <option value="everyone">Everyone</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Goal name</label>
+      <input id="f-name" type="text" placeholder="e.g. New Bike, Vacation, iPad" autofocus />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Target amount</label>
+        <div class="input-prefix"><span class="prefix">$</span>
+          <input id="f-target" type="number" min="1" step="1" placeholder="0" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Target date <span style="font-weight:400;text-transform:none">(opt.)</span></label>
+        <input id="f-date" type="date" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Starting balance</label>
+      <div class="input-prefix"><span class="prefix">$</span>
+        <input id="f-balance" type="number" min="0" step="1" placeholder="0" />
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddGoal()">Add Goal</button>
+    </div>`);
+}
+
+window.submitAddGoal = async function() {
+  const name = document.getElementById("f-name")?.value.trim();
+  if (!name) { document.getElementById("f-name")?.focus(); return; }
+  const rawTarget = parseFloat(document.getElementById("f-target")?.value ?? "");
+  if (!rawTarget || rawTarget <= 0) { document.getElementById("f-target")?.focus(); return; }
+  const memberId    = document.getElementById("f-member")?.value;
+  const visibility  = document.getElementById("f-vis")?.value ?? "adults";
+  const targetDate  = document.getElementById("f-date")?.value || null;
+  const rawBal      = parseFloat(document.getElementById("f-balance")?.value ?? "0") || 0;
+  const balCents    = Math.round(rawBal * 100);
+  const targetCents = Math.round(rawTarget * 100);
+  const btn = modalEl?.querySelector(".btn-primary");
+  if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
+  try {
+    const id = crypto.randomUUID(), now = new Date().toISOString();
+    await db(`INSERT INTO savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [id, memberId, name, targetCents, targetDate, visibility, now]);
+    if (balCents > 0) {
+      await db(`INSERT INTO goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
+        [crypto.randomUUID(), id, balCents, ME?.id ?? "system", now]);
+    }
+    await loadAll(); closeModal(); render();
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = "Add Goal"; }
+    throw e;
+  }
+};
+
+function openUpdateGoalModal(goalId) {
+  const goal = goals.find(g => g.id === goalId); if (!goal) return;
+  const wg = goalWithLatest(goal);
+  const member = members.find(m => m.id === goal.member_id);
+  openModal(`
+    <h3>🎯 Update ${esc(goal.name)}</h3>
+    <div style="font-size:.85rem;color:var(--muted);margin-bottom:14px">
+      For <strong>${esc(member?.name ?? "?")}</strong> · Target: <strong>${fmtMoney(goal.target_cents)}</strong> · Saved: <strong>${fmtMoney(wg.latestCents)}</strong>
+    </div>
+    <div class="form-group">
+      <label>Current saved amount</label>
+      <div class="input-prefix"><span class="prefix">$</span>
+        <input id="f-balance" type="number" min="0" step="0.01" placeholder="${wg.latestCents / 100 || 0}" autofocus />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Visible to</label>
+        <select id="f-vis">
+          <option value="adults"   ${goal.visibility === "adults"   ? "selected" : ""}>Adults only</option>
+          <option value="everyone" ${goal.visibility === "everyone" ? "selected" : ""}>Everyone</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Target date</label>
+        <input id="f-date" type="date" value="${goal.target_date ?? ""}" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Note <span style="font-weight:400;text-transform:none">(optional)</span></label>
+      <input id="f-note" type="text" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteGoal('${goalId}')" style="flex:0">Delete</button>
+      <button class="btn btn-primary" onclick="submitUpdateGoal('${goalId}', ${goal.target_cents})">Update</button>
+    </div>`);
+}
+
+window.submitUpdateGoal = async function(goalId, targetCents) {
+  const rawBal = parseFloat(document.getElementById("f-balance")?.value ?? "");
+  if (isNaN(rawBal) || rawBal < 0) { document.getElementById("f-balance")?.focus(); return; }
+  const vis      = document.getElementById("f-vis")?.value ?? "adults";
+  const date     = document.getElementById("f-date")?.value || null;
+  const note     = document.getElementById("f-note")?.value.trim() ?? "";
+  const balCents = Math.round(rawBal * 100);
+  const btn = modalEl?.querySelector(".btn-primary");
+  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+  try {
+    const now = new Date().toISOString();
+    const achieved = balCents >= targetCents ? now : null;
+    await Promise.all([
+      db(`UPDATE savings_goals SET visibility = ?, target_date = ?, achieved_at = ? WHERE id = ?`, [vis, date, achieved, goalId]),
+      db(`INSERT INTO goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
+        [crypto.randomUUID(), goalId, balCents, note, ME?.id ?? "system", now]),
+    ]);
+    if (achieved) {
+      const goal = goals.find(g => g.id === goalId);
+      if (goal && !goal.achieved_at) await publishGoalReached({ ...goal, latestCents: balCents });
+    }
+    await loadAll(); closeModal(); render();
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = "Update"; }
+    throw e;
+  }
+};
+
+window.deleteGoal = async function(goalId) {
+  if (!await hubConfirm({ message: "Delete this goal?", description: "All progress history will be removed.", confirmLabel: "Delete", destructive: true })) return;
+  closeModal();
+  await db(`DELETE FROM goal_snapshots WHERE goal_id = ?`, [goalId]);
+  await db(`DELETE FROM savings_goals WHERE id = ?`, [goalId]);
+  await loadAll(); render();
+};
+
+// ── Render helpers ────────────────────────────────────────────────────────────
+function renderProgressBar(current, target) {
+  const pct = calcProgress(current, target);
+  if (pct === null) return "";
+  const fill = Math.round(pct * 100);
+  return `
+    <div class="progress-bar"><div class="progress-fill ${pct >= 1 ? "complete" : ""}" style="width:${fill}%"></div></div>
+    <div class="progress-label"><span>${fmtMoney(current)}</span><span>${fmtMoney(target)}</span></div>`;
+}
+
+// ── Tab: Net Worth ────────────────────────────────────────────────────────────
+function renderNetWorthTab() {
+  const enriched = accounts.map(accountWithLatest);
+  const { assets, liabilities, netWorth } = calcNetWorth(enriched);
+  const history = buildNetWorthHistory(accounts, acctSnapshots);
+  const trend   = history.length >= 2 ? calcTrend(history[history.length - 1].netWorth, history[history.length - 2].netWorth) : null;
+
+  const nwClass = netWorth > 0 ? "positive" : netWorth < 0 ? "negative" : "zero";
+  const trendLabel = !trend ? "" : trend.delta === 0 ? "No change" : `${trend.delta > 0 ? "+" : ""}${fmtMoney(trend.delta)}`;
+  const trendHtml = trend
+    ? `<div class="nw-trend ${trend.direction}">${trend.direction === "up" ? "▲" : trend.direction === "down" ? "▼" : "—"} ${trendLabel} vs prior</div>`
+    : "";
+
+  const assetAccts = enriched.filter(a => a.type === "asset");
+  const liabAccts  = enriched.filter(a => a.type === "liability");
+
+  const renderAccountCards = list => !list.length
+    ? `<div class="empty" style="padding:16px 0">None added yet.</div>`
+    : list.map(acct => `
+        <div class="item-card">
+          <div class="item-icon">${categoryIcon(acct.category)}</div>
+          <div class="item-body">
+            <div class="item-name">${esc(acct.name)}</div>
+            <div class="item-sub">${categoryLabel(acct.category)}${acct.latestSnap ? ` · Updated ${fmtMonthYear(acct.latestSnap.recorded_at)}` : ""}</div>
+          </div>
+          <div class="item-right">
+            <div class="item-amount ${acct.type}">${fmtMoney(acct.latestCents)}</div>
+            <div class="item-actions"><button class="btn btn-ghost btn-sm" onclick="openUpdateAccountModal('${acct.id}')">Update</button></div>
+          </div>
+        </div>`).join("");
+
+  return `
+    <div class="nw-hero">
+      <div class="label">Net Worth</div>
+      <div class="amount ${nwClass}">${fmtMoneyShort(netWorth)}</div>
+      ${trendHtml}
+      <div class="breakdown">
+        <div><span>Assets </span><strong>${fmtMoneyShort(assets)}</strong></div>
+        <div><span>Liabilities </span><strong>${fmtMoneyShort(liabilities)}</strong></div>
+      </div>
+    </div>
+    <div class="section-header"><div class="section-title">Assets</div></div>
+    ${renderAccountCards(assetAccts)}
+    <div class="section-header" style="margin-top:6px"><div class="section-title">Liabilities</div></div>
+    ${renderAccountCards(liabAccts)}
+    <div class="add-row"><button class="btn btn-ghost btn-sm" onclick="openAddAccountModal()">+ Add Account</button></div>`;
+}
+
+// ── Tab: Funds ────────────────────────────────────────────────────────────────
+function renderFundsTab() {
+  if (!funds.length) return `
+    <div class="empty">No funds yet. Add an emergency fund, vacation fund, or any named pool of money.</div>
+    <div class="add-row"><button class="btn btn-ghost btn-sm" onclick="openAddFundModal()">+ Add Fund</button></div>`;
+
+  const cards = funds.map(fund => {
+    const wf = fundWithLatest(fund);
+    return `
+      <div class="item-card">
+        <div class="item-icon">💰</div>
+        <div class="item-body">
+          <div class="item-name">${esc(fund.name)}</div>
+          <div class="item-sub">${wf.latestSnap ? `Updated ${fmtMonthYear(wf.latestSnap.recorded_at)}` : "No data yet"}</div>
+          ${fund.target_cents ? `<div class="item-progress">${renderProgressBar(wf.latestCents, fund.target_cents)}</div>` : ""}
+        </div>
+        <div class="item-right">
+          <div class="item-amount" style="color:var(--green)">${fmtMoney(wf.latestCents)}</div>
+          <div class="item-actions"><button class="btn btn-ghost btn-sm" onclick="openUpdateFundModal('${fund.id}')">Update</button></div>
+        </div>
+      </div>`;
+  }).join("");
+
+  return `${cards}<div class="add-row"><button class="btn btn-ghost btn-sm" onclick="openAddFundModal()">+ Add Fund</button></div>`;
+}
+
+// ── Tab: Goals ────────────────────────────────────────────────────────────────
+function renderGoalsTab() {
+  const meIsAdult = isAdult(ME);
+  const visibleGoals = meIsAdult
+    ? goals
+    : goals.filter(g => g.member_id === ME?.id || g.visibility === "everyone");
+
+  if (!visibleGoals.length) return `
+    <div class="empty">${meIsAdult ? "No savings goals yet. Create goals for any household member." : "No savings goals to show yet."}</div>
+    ${meIsAdult ? `<div class="add-row"><button class="btn btn-ghost btn-sm" onclick="openAddGoalModal()">+ Add Goal</button></div>` : ""}`;
+
+  const memberIds = [...new Set(visibleGoals.map(g => g.member_id))];
+  let html = "";
+
+  for (const mid of memberIds) {
+    const member = members.find(m => m.id === mid);
+    html += `
+      <div class="member-row">
+        <div class="avatar" style="background:${memberColor(mid, members)}">${initial(member?.name ?? "?")}</div>
+        <div class="name">${esc(member?.name ?? "Unknown")}</div>
+      </div>`;
+
+    for (const goal of visibleGoals.filter(g => g.member_id === mid)) {
+      const wg = goalWithLatest(goal);
+      const visBadge = meIsAdult
+        ? `<span class="vis-badge ${goal.visibility}" title="${goal.visibility === "everyone" ? "Visible to everyone" : "Adults only"}">${goal.visibility === "everyone" ? "🌍" : "🔒"}</span>`
+        : "";
+      const achieved = goal.achieved_at
+        ? `<div style="margin-top:4px"><span class="achieved-badge">🎉 Achieved ${fmtDate(goal.achieved_at)}</span></div>`
+        : "";
+      const targetDate = goal.target_date && !goal.achieved_at
+        ? ` · By ${fmtDate(goal.target_date)}`
+        : "";
+
+      html += `
+        <div class="item-card">
+          <div class="item-icon">🎯</div>
+          <div class="item-body">
+            <div class="item-name">${esc(goal.name)}${visBadge}</div>
+            <div class="item-sub">${wg.latestSnap ? `Updated ${fmtMonthYear(wg.latestSnap.recorded_at)}` : "No data"}${targetDate}</div>
+            <div class="item-progress">${renderProgressBar(wg.latestCents, goal.target_cents)}</div>
+            ${achieved}
+          </div>
+          <div class="item-right">
+            <div class="item-amount" style="color:var(--accent)">${fmtMoney(wg.latestCents)}</div>
+            ${meIsAdult ? `<div class="item-actions"><button class="btn btn-ghost btn-sm" onclick="openUpdateGoalModal('${goal.id}')">Update</button></div>` : ""}
+          </div>
+        </div>`;
+    }
+  }
+
+  if (meIsAdult) html += `<div class="add-row"><button class="btn btn-ghost btn-sm" onclick="openAddGoalModal()">+ Add Goal</button></div>`;
+  return html;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  if (!ME) {
+    document.getElementById("root").innerHTML = `<div class="empty">Please log in to view household finances.</div>`;
+    return;
+  }
+  const meIsAdult = isAdult(ME);
+  if (!meIsAdult) activeTab = "goals";
+
+  const tabsHtml = meIsAdult ? `
+    <div class="tabs">
+      <button class="tab ${activeTab === "networth" ? "active" : ""}" onclick="setTab('networth')">Net Worth</button>
+      <button class="tab ${activeTab === "funds"    ? "active" : ""}" onclick="setTab('funds')">Funds</button>
+      <button class="tab ${activeTab === "goals"    ? "active" : ""}" onclick="setTab('goals')">Goals</button>
+    </div>` : "";
+
+  let content = "";
+  if (activeTab === "networth" && meIsAdult) content = renderNetWorthTab();
+  else if (activeTab === "funds" && meIsAdult) content = renderFundsTab();
+  else content = renderGoalsTab();
+
+  document.getElementById("root").innerHTML = `
+    <header>
+      <div><h1>🪺 Nest Egg</h1><div class="sub">Household finances</div></div>
+    </header>
+    ${tabsHtml}
+    <div id="tab-content">${content}</div>`;
+}
+
+window.setTab = function(tab) { activeTab = tab; render(); };
+window.openAddAccountModal    = openAddAccountModal;
+window.openUpdateAccountModal = openUpdateAccountModal;
+window.openAddFundModal       = openAddFundModal;
+window.openUpdateFundModal    = openUpdateFundModal;
+window.openAddGoalModal       = openAddGoalModal;
+window.openUpdateGoalModal    = openUpdateGoalModal;
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+  await loadMembers();
+  await loadAll();
+  render();
+})();
+</script>
+</body>
+</html>
