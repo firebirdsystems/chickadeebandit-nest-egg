@@ -407,17 +407,22 @@ function openUpdateAccountModal(acctId) {
 window.submitUpdateAccount = async function(acctId) {
   const rawVal = parseFloat(document.getElementById("f-value")?.value ?? "");
   if (isNaN(rawVal) || rawVal < 0) { document.getElementById("f-value")?.focus(); return; }
-  const note = document.getElementById("f-note")?.value.trim() ?? "";
-  const btn  = modalEl?.querySelector(".btn-primary");
-  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+  const note   = document.getElementById("f-note")?.value.trim() ?? "";
+  const snapId = crypto.randomUUID();
+  const now    = new Date().toISOString();
+  const cents  = Math.round(rawVal * 100);
+
+  const optimisticSnap = { id: snapId, account_id: acctId, value_cents: cents, note, recorded_by: ME?.id ?? "system", recorded_at: now };
+  acctSnapshots.push(optimisticSnap);
+  closeModal(); render();
+
   try {
-    const now = new Date().toISOString();
     await db(`INSERT INTO account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
-      [crypto.randomUUID(), acctId, Math.round(rawVal * 100), note, ME?.id ?? "system", now]);
-    await loadAll(); closeModal(); render();
-  } catch (e) {
-    if (btn) { btn.disabled = false; btn.textContent = "Update"; }
-    throw e;
+      [snapId, acctId, cents, note, ME?.id ?? "system", now]);
+  } catch {
+    const idx = acctSnapshots.indexOf(optimisticSnap);
+    if (idx !== -1) acctSnapshots.splice(idx, 1);
+    render();
   }
 };
 
@@ -511,23 +516,32 @@ function openUpdateFundModal(fundId) {
 window.submitUpdateFund = async function(fundId) {
   const rawBal    = parseFloat(document.getElementById("f-balance")?.value ?? "");
   if (isNaN(rawBal) || rawBal < 0) { document.getElementById("f-balance")?.focus(); return; }
-  const rawTarget = parseFloat(document.getElementById("f-target")?.value ?? "");
-  const note      = document.getElementById("f-note")?.value.trim() ?? "";
-  const balCents  = Math.round(rawBal * 100);
+  const rawTarget   = parseFloat(document.getElementById("f-target")?.value ?? "");
+  const note        = document.getElementById("f-note")?.value.trim() ?? "";
+  const balCents    = Math.round(rawBal * 100);
   const targetCents = isNaN(rawTarget) || rawTarget <= 0 ? null : Math.round(rawTarget * 100);
-  const btn = modalEl?.querySelector(".btn-primary");
-  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+  const snapId      = crypto.randomUUID();
+  const now         = new Date().toISOString();
+
+  const fund = funds.find(f => f.id === fundId);
+  const origTargetCents = fund?.target_cents;
+  const optimisticSnap  = { id: snapId, fund_id: fundId, balance_cents: balCents, note, recorded_by: ME?.id ?? "system", recorded_at: now };
+
+  if (fund) fund.target_cents = targetCents;
+  fundSnapshots.push(optimisticSnap);
+  closeModal(); render();
+
   try {
-    const now = new Date().toISOString();
     await Promise.all([
       db(`UPDATE funds SET target_cents = ? WHERE id = ?`, [targetCents, fundId]),
       db(`INSERT INTO fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
-        [crypto.randomUUID(), fundId, balCents, note, ME?.id ?? "system", now]),
+        [snapId, fundId, balCents, note, ME?.id ?? "system", now]),
     ]);
-    await loadAll(); closeModal(); render();
-  } catch (e) {
-    if (btn) { btn.disabled = false; btn.textContent = "Update"; }
-    throw e;
+  } catch {
+    if (fund) fund.target_cents = origTargetCents;
+    const idx = fundSnapshots.indexOf(optimisticSnap);
+    if (idx !== -1) fundSnapshots.splice(idx, 1);
+    render();
   }
 };
 
@@ -658,24 +672,31 @@ window.submitUpdateGoal = async function(goalId, targetCents) {
   const date     = document.getElementById("f-date")?.value || null;
   const note     = document.getElementById("f-note")?.value.trim() ?? "";
   const balCents = Math.round(rawBal * 100);
-  const btn = modalEl?.querySelector(".btn-primary");
-  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+  const snapId   = crypto.randomUUID();
+  const now      = new Date().toISOString();
+  const achieved = balCents >= targetCents ? now : null;
+
+  const goal = goals.find(g => g.id === goalId);
+  const origGoal = goal ? { visibility: goal.visibility, target_date: goal.target_date, achieved_at: goal.achieved_at } : null;
+  const optimisticSnap = { id: snapId, goal_id: goalId, balance_cents: balCents, note, recorded_by: ME?.id ?? "system", recorded_at: now };
+  const wasAchieved = goal?.achieved_at;
+
+  if (goal) Object.assign(goal, { visibility: vis, target_date: date, achieved_at: achieved });
+  goalSnapshots.push(optimisticSnap);
+  closeModal(); render();
+
   try {
-    const now = new Date().toISOString();
-    const achieved = balCents >= targetCents ? now : null;
     await Promise.all([
       db(`UPDATE savings_goals SET visibility = ?, target_date = ?, achieved_at = ? WHERE id = ?`, [vis, date, achieved, goalId]),
       db(`INSERT INTO goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
-        [crypto.randomUUID(), goalId, balCents, note, ME?.id ?? "system", now]),
+        [snapId, goalId, balCents, note, ME?.id ?? "system", now]),
     ]);
-    if (achieved) {
-      const goal = goals.find(g => g.id === goalId);
-      if (goal && !goal.achieved_at) await publishGoalReached({ ...goal, latestCents: balCents });
-    }
-    await loadAll(); closeModal(); render();
-  } catch (e) {
-    if (btn) { btn.disabled = false; btn.textContent = "Update"; }
-    throw e;
+    if (achieved && !wasAchieved && goal) await publishGoalReached({ ...goal, latestCents: balCents });
+  } catch {
+    if (goal && origGoal) Object.assign(goal, origGoal);
+    const idx = goalSnapshots.indexOf(optimisticSnap);
+    if (idx !== -1) goalSnapshots.splice(idx, 1);
+    render();
   }
 };
 
