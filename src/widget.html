@@ -94,14 +94,14 @@
 
     if (isAdult(ME)) {
       const [a, as_] = await Promise.all([
-        db(`SELECT * FROM accounts WHERE archived_at IS NULL`),
-        db(`SELECT * FROM account_snapshots ORDER BY recorded_at DESC LIMIT 200`),
+        db(`SELECT * FROM app_nest_egg__accounts WHERE archived_at IS NULL`),
+        db(`SELECT * FROM app_nest_egg__account_snapshots ORDER BY recorded_at DESC LIMIT 200`),
       ]);
       renderAdult(a.rows ?? [], as_.rows ?? []);
     } else {
       const [g, gs_] = await Promise.all([
-        db(`SELECT * FROM savings_goals`),
-        db(`SELECT * FROM goal_snapshots ORDER BY recorded_at DESC LIMIT 200`),
+        db(`SELECT * FROM app_nest_egg__savings_goals`),
+        db(`SELECT * FROM app_nest_egg__goal_snapshots ORDER BY recorded_at DESC LIMIT 200`),
       ]);
       renderKid(g.rows ?? [], gs_.rows ?? []);
     }

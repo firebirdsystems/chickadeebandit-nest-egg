@@ -16,6 +16,19 @@
     "requires_approval": false
   },
   "storage": "db",
+  "row_policies": {
+    "savings_goals": {
+      "kind": "owner_or_visibility",
+      "member_column": "member_id",
+      "visibility_column": "visibility",
+      "everyone_values": ["everyone"],
+      "adult_values": ["adults", "everyone"]
+    },
+    "accounts": { "kind": "adult_only" },
+    "account_snapshots": { "kind": "adult_only" },
+    "funds": { "kind": "adult_only" },
+    "fund_snapshots": { "kind": "adult_only" }
+  },
   "publishes": ["nest-egg.goal-reached"],
   "nav": { "label": "Nest Egg" },
   "widget": { "label": "Nest Egg", "size": "small" },

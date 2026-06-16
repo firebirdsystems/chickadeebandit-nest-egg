@@ -198,13 +198,31 @@ async function loadMembers() {
 
 async function loadAll() {
   if (!DB) { loadDemoData(); return; }
+
+  // Kids can only ever see their own goals + goals shared with everyone — net
+  // worth, accounts, and funds are adult-only and are not fetched at all so
+  // the data never reaches a child's session.
+  if (!isAdult(ME)) {
+    const [g, gs_] = await Promise.all([
+      db(`SELECT * FROM app_nest_egg__savings_goals WHERE member_id = ? OR visibility = 'everyone' ORDER BY member_id, created_at`, [ME?.id ?? ""]),
+      db(`SELECT * FROM app_nest_egg__goal_snapshots WHERE goal_id IN (SELECT id FROM app_nest_egg__savings_goals WHERE member_id = ? OR visibility = 'everyone') ORDER BY recorded_at DESC LIMIT 500`, [ME?.id ?? ""]),
+    ]);
+    accounts      = [];
+    acctSnapshots = [];
+    funds         = [];
+    fundSnapshots = [];
+    goals         = g.rows  ?? [];
+    goalSnapshots = gs_.rows ?? [];
+    return;
+  }
+
   const [a, as_, f, fs_, g, gs_] = await Promise.all([
-    db(`SELECT * FROM accounts   WHERE archived_at IS NULL ORDER BY type, category`),
-    db(`SELECT * FROM account_snapshots ORDER BY recorded_at DESC LIMIT 500`),
-    db(`SELECT * FROM funds       WHERE archived_at IS NULL ORDER BY name`),
-    db(`SELECT * FROM fund_snapshots    ORDER BY recorded_at DESC LIMIT 500`),
-    db(`SELECT * FROM savings_goals ORDER BY member_id, created_at`),
-    db(`SELECT * FROM goal_snapshots    ORDER BY recorded_at DESC LIMIT 500`),
+    db(`SELECT * FROM app_nest_egg__accounts   WHERE archived_at IS NULL ORDER BY type, category`),
+    db(`SELECT * FROM app_nest_egg__account_snapshots ORDER BY recorded_at DESC LIMIT 500`),
+    db(`SELECT * FROM app_nest_egg__funds       WHERE archived_at IS NULL ORDER BY name`),
+    db(`SELECT * FROM app_nest_egg__fund_snapshots    ORDER BY recorded_at DESC LIMIT 500`),
+    db(`SELECT * FROM app_nest_egg__savings_goals ORDER BY member_id, created_at`),
+    db(`SELECT * FROM app_nest_egg__goal_snapshots    ORDER BY recorded_at DESC LIMIT 500`),
   ]);
   accounts      = a.rows   ?? [];
   acctSnapshots = as_.rows ?? [];
@@ -356,6 +374,7 @@ function openAddAccountModal() {
 }
 
 window.submitAddAccount = async function() {
+  if (!isAdult(ME)) return;
   const name = document.getElementById("f-name")?.value.trim();
   if (!name) { document.getElementById("f-name")?.focus(); return; }
   const type     = document.getElementById("f-type")?.value;
@@ -367,9 +386,9 @@ window.submitAddAccount = async function() {
   if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
   try {
     const id = crypto.randomUUID(), now = new Date().toISOString();
-    await db(`INSERT INTO accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, ?)`, [id, name, category, type, now]);
+    await db(`INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, ?)`, [id, name, category, type, now]);
     if (cents > 0) {
-      await db(`INSERT INTO account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
+      await db(`INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
         [crypto.randomUUID(), id, cents, ME?.id ?? "system", now]);
     }
     await loadAll(); closeModal(); render();
@@ -405,6 +424,7 @@ function openUpdateAccountModal(acctId) {
 }
 
 window.submitUpdateAccount = async function(acctId) {
+  if (!isAdult(ME)) return;
   const rawVal = parseFloat(document.getElementById("f-value")?.value ?? "");
   if (isNaN(rawVal) || rawVal < 0) { document.getElementById("f-value")?.focus(); return; }
   const note   = document.getElementById("f-note")?.value.trim() ?? "";
@@ -417,7 +437,7 @@ window.submitUpdateAccount = async function(acctId) {
   closeModal(); render();
 
   try {
-    await db(`INSERT INTO account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
+    await db(`INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
       [snapId, acctId, cents, note, ME?.id ?? "system", now]);
   } catch {
     const idx = acctSnapshots.indexOf(optimisticSnap);
@@ -427,9 +447,10 @@ window.submitUpdateAccount = async function(acctId) {
 };
 
 window.archiveAccount = async function(acctId) {
+  if (!isAdult(ME)) return;
   if (!await hubConfirm({ message: "Remove this account?", description: "Historical snapshots are kept. You can re-add it later.", confirmLabel: "Remove", destructive: true })) return;
   closeModal();
-  await db(`UPDATE accounts SET archived_at = ? WHERE id = ?`, [new Date().toISOString(), acctId]);
+  await db(`UPDATE app_nest_egg__accounts SET archived_at = ? WHERE id = ?`, [new Date().toISOString(), acctId]);
   await loadAll(); render();
 };
 
@@ -460,6 +481,7 @@ function openAddFundModal() {
 }
 
 window.submitAddFund = async function() {
+  if (!isAdult(ME)) return;
   const name = document.getElementById("f-name")?.value.trim();
   if (!name) { document.getElementById("f-name")?.focus(); return; }
   const rawBal    = parseFloat(document.getElementById("f-balance")?.value ?? "0") || 0;
@@ -470,9 +492,9 @@ window.submitAddFund = async function() {
   if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
   try {
     const id = crypto.randomUUID(), now = new Date().toISOString();
-    await db(`INSERT INTO funds (id, name, target_cents, created_at) VALUES (?, ?, ?, ?)`, [id, name, targetCents, now]);
+    await db(`INSERT INTO app_nest_egg__funds (id, name, target_cents, created_at) VALUES (?, ?, ?, ?)`, [id, name, targetCents, now]);
     if (balCents > 0) {
-      await db(`INSERT INTO fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
+      await db(`INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
         [crypto.randomUUID(), id, balCents, ME?.id ?? "system", now]);
     }
     await loadAll(); closeModal(); render();
@@ -514,6 +536,7 @@ function openUpdateFundModal(fundId) {
 }
 
 window.submitUpdateFund = async function(fundId) {
+  if (!isAdult(ME)) return;
   const rawBal    = parseFloat(document.getElementById("f-balance")?.value ?? "");
   if (isNaN(rawBal) || rawBal < 0) { document.getElementById("f-balance")?.focus(); return; }
   const rawTarget   = parseFloat(document.getElementById("f-target")?.value ?? "");
@@ -533,8 +556,8 @@ window.submitUpdateFund = async function(fundId) {
 
   try {
     await Promise.all([
-      db(`UPDATE funds SET target_cents = ? WHERE id = ?`, [targetCents, fundId]),
-      db(`INSERT INTO fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
+      db(`UPDATE app_nest_egg__funds SET target_cents = ? WHERE id = ?`, [targetCents, fundId]),
+      db(`INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
         [snapId, fundId, balCents, note, ME?.id ?? "system", now]),
     ]);
   } catch {
@@ -546,9 +569,10 @@ window.submitUpdateFund = async function(fundId) {
 };
 
 window.archiveFund = async function(fundId) {
+  if (!isAdult(ME)) return;
   if (!await hubConfirm({ message: "Remove this fund?", description: "History is kept.", confirmLabel: "Remove", destructive: true })) return;
   closeModal();
-  await db(`UPDATE funds SET archived_at = ? WHERE id = ?`, [new Date().toISOString(), fundId]);
+  await db(`UPDATE app_nest_egg__funds SET archived_at = ? WHERE id = ?`, [new Date().toISOString(), fundId]);
   await loadAll(); render();
 };
 
@@ -599,6 +623,7 @@ function openAddGoalModal() {
 }
 
 window.submitAddGoal = async function() {
+  if (!isAdult(ME)) return;
   const name = document.getElementById("f-name")?.value.trim();
   if (!name) { document.getElementById("f-name")?.focus(); return; }
   const rawTarget = parseFloat(document.getElementById("f-target")?.value ?? "");
@@ -613,10 +638,10 @@ window.submitAddGoal = async function() {
   if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
   try {
     const id = crypto.randomUUID(), now = new Date().toISOString();
-    await db(`INSERT INTO savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    await db(`INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [id, memberId, name, targetCents, targetDate, visibility, now]);
     if (balCents > 0) {
-      await db(`INSERT INTO goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
+      await db(`INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
         [crypto.randomUUID(), id, balCents, ME?.id ?? "system", now]);
     }
     await loadAll(); closeModal(); render();
@@ -666,6 +691,7 @@ function openUpdateGoalModal(goalId) {
 }
 
 window.submitUpdateGoal = async function(goalId, targetCents) {
+  if (!isAdult(ME)) return;
   const rawBal = parseFloat(document.getElementById("f-balance")?.value ?? "");
   if (isNaN(rawBal) || rawBal < 0) { document.getElementById("f-balance")?.focus(); return; }
   const vis      = document.getElementById("f-vis")?.value ?? "adults";
@@ -687,8 +713,8 @@ window.submitUpdateGoal = async function(goalId, targetCents) {
 
   try {
     await Promise.all([
-      db(`UPDATE savings_goals SET visibility = ?, target_date = ?, achieved_at = ? WHERE id = ?`, [vis, date, achieved, goalId]),
-      db(`INSERT INTO goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
+      db(`UPDATE app_nest_egg__savings_goals SET visibility = ?, target_date = ?, achieved_at = ? WHERE id = ?`, [vis, date, achieved, goalId]),
+      db(`INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
         [snapId, goalId, balCents, note, ME?.id ?? "system", now]),
     ]);
     if (achieved && !wasAchieved && goal) await publishGoalReached({ ...goal, latestCents: balCents });
@@ -701,10 +727,11 @@ window.submitUpdateGoal = async function(goalId, targetCents) {
 };
 
 window.deleteGoal = async function(goalId) {
+  if (!isAdult(ME)) return;
   if (!await hubConfirm({ message: "Delete this goal?", description: "All progress history will be removed.", confirmLabel: "Delete", destructive: true })) return;
   closeModal();
-  await db(`DELETE FROM goal_snapshots WHERE goal_id = ?`, [goalId]);
-  await db(`DELETE FROM savings_goals WHERE id = ?`, [goalId]);
+  await db(`DELETE FROM app_nest_egg__goal_snapshots WHERE goal_id = ?`, [goalId]);
+  await db(`DELETE FROM app_nest_egg__savings_goals WHERE id = ?`, [goalId]);
   await loadAll(); render();
 };
 
