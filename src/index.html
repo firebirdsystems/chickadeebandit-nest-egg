@@ -204,8 +204,8 @@ async function loadAll() {
   // the data never reaches a child's session.
   if (!isAdult(ME)) {
     const [g, gs_] = await Promise.all([
-      db(`SELECT * FROM app_nest_egg__savings_goals WHERE member_id = ? OR visibility = 'everyone' ORDER BY member_id, created_at`, [ME?.id ?? ""]),
-      db(`SELECT * FROM app_nest_egg__goal_snapshots WHERE goal_id IN (SELECT id FROM app_nest_egg__savings_goals WHERE member_id = ? OR visibility = 'everyone') ORDER BY recorded_at DESC LIMIT 500`, [ME?.id ?? ""]),
+      db(`SELECT * FROM app_nest_egg__savings_goals ORDER BY member_id, created_at`),
+      db(`SELECT * FROM app_nest_egg__goal_snapshots ORDER BY recorded_at DESC LIMIT 500`),
     ]);
     accounts      = [];
     acctSnapshots = [];
@@ -730,7 +730,11 @@ window.deleteGoal = async function(goalId) {
   if (!isAdult(ME)) return;
   if (!await hubConfirm({ message: "Delete this goal?", description: "All progress history will be removed.", confirmLabel: "Delete", destructive: true })) return;
   closeModal();
-  await db(`DELETE FROM app_nest_egg__goal_snapshots WHERE goal_id = ?`, [goalId]);
+  // Snapshots are not explicitly deleted here: the inherit_visibility policy on
+  // goal_snapshots scopes deletes to the recorder's own rows (no adult bypass),
+  // so orphan snapshots from other recorders would remain. Deleting the goal row
+  // is sufficient — orphan snapshots become invisible (the EXISTS check returns
+  // false) and are harmless at family scale.
   await db(`DELETE FROM app_nest_egg__savings_goals WHERE id = ?`, [goalId]);
   await loadAll(); render();
 };

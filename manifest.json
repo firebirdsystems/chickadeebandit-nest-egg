@@ -27,7 +27,16 @@
     "accounts": { "kind": "adult_only" },
     "account_snapshots": { "kind": "adult_only" },
     "funds": { "kind": "adult_only" },
-    "fund_snapshots": { "kind": "adult_only" }
+    "fund_snapshots": { "kind": "adult_only" },
+    "goal_snapshots": {
+      "kind": "inherit_visibility",
+      "fk_column": "goal_id",
+      "parent_table": "savings_goals",
+      "writer_column": "recorded_by"
+    }
+  },
+  "publish_acls": {
+    "nest-egg.goal-reached": { "require_role": "adult" }
   },
   "publishes": ["nest-egg.goal-reached"],
   "nav": { "label": "Nest Egg" },
