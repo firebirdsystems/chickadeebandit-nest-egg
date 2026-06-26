@@ -33,7 +33,7 @@
   <div id="root"></div>
 
   <script type="module">
-  import { isAdult, fmtMoney, fmtMoneyShort } from "/hub-sdk.js";
+  import { isAdult, fmtMoney, fmtMoneyShort, esc } from "/hub-sdk.js";
   import { calcNetWorth, calcTrend, latestOf, buildNetWorthHistory } from "./logic.js";
 
   const CONTEXT = window.__CONTEXT_URL ?? "";
@@ -84,7 +84,7 @@
     const pct = Math.round(Math.min(top.progress, 1) * 100);
     document.getElementById("root").innerHTML = `
       <div class="label">Savings Goal</div>
-      <div class="goal-name">${top.name}</div>
+      <div class="goal-name">${esc(top.name)}</div>
       <div class="progress-bar"><div class="progress-fill ${pct >= 100 ? "complete" : ""}" style="width:${pct}%"></div></div>
       <div class="progress-label"><span>${fmtMoney(top.balance)}</span><span>${fmtMoney(top.target_cents)}</span></div>`;
   }
