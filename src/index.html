@@ -421,8 +421,8 @@ function openUpdateAccountModal(acctId) {
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-danger btn-sm" onclick="archiveAccount('${acctId}')" style="flex:0">Remove</button>
-      <button class="btn btn-primary" onclick="submitUpdateAccount('${acctId}')">Update</button>
+      <button class="btn btn-danger btn-sm" data-act="archive-account" data-id="${esc(acctId)}" style="flex:0">Remove</button>
+      <button class="btn btn-primary" data-act="submit-update-account" data-id="${esc(acctId)}">Update</button>
     </div>`);
 }
 
@@ -533,8 +533,8 @@ function openUpdateFundModal(fundId) {
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-danger btn-sm" onclick="archiveFund('${fundId}')" style="flex:0">Remove</button>
-      <button class="btn btn-primary" onclick="submitUpdateFund('${fundId}')">Update</button>
+      <button class="btn btn-danger btn-sm" data-act="archive-fund" data-id="${esc(fundId)}" style="flex:0">Remove</button>
+      <button class="btn btn-primary" data-act="submit-update-fund" data-id="${esc(fundId)}">Update</button>
     </div>`);
 }
 
@@ -688,12 +688,12 @@ function openUpdateGoalModal(goalId) {
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-danger btn-sm" onclick="deleteGoal('${goalId}')" style="flex:0">Delete</button>
-      <button class="btn btn-primary" onclick="submitUpdateGoal('${goalId}', ${goal.target_cents})">Update</button>
+      <button class="btn btn-danger btn-sm" data-act="delete-goal" data-id="${esc(goalId)}" style="flex:0">Delete</button>
+      <button class="btn btn-primary" data-act="submit-update-goal" data-id="${esc(goalId)}">Update</button>
     </div>`);
 }
 
-window.submitUpdateGoal = async function(goalId, targetCents) {
+window.submitUpdateGoal = async function(goalId) {
   if (!isAdult(ME)) return;
   const rawBal = parseFloat(document.getElementById("f-balance")?.value ?? "");
   if (isNaN(rawBal) || rawBal < 0) { document.getElementById("f-balance")?.focus(); return; }
@@ -703,9 +703,10 @@ window.submitUpdateGoal = async function(goalId, targetCents) {
   const balCents = Math.round(rawBal * 100);
   const snapId   = crypto.randomUUID();
   const now      = new Date().toISOString();
-  const achieved = balCents >= targetCents ? now : null;
 
   const goal = goals.find(g => g.id === goalId);
+  const targetCents = goal?.target_cents ?? 0;
+  const achieved = balCents >= targetCents ? now : null;
   const origGoal = goal ? { visibility: goal.visibility, target_date: goal.target_date, achieved_at: goal.achieved_at } : null;
   const optimisticSnap = { id: snapId, goal_id: goalId, balance_cents: balCents, note, recorded_by: ME?.id ?? "system", recorded_at: now };
   const wasAchieved = goal?.achieved_at;
@@ -779,7 +780,7 @@ function renderNetWorthTab() {
           </div>
           <div class="item-right">
             <div class="item-amount ${acct.type}">${fmtMoney(acct.latestCents)}</div>
-            <div class="item-actions"><button class="btn btn-ghost btn-sm" onclick="openUpdateAccountModal('${acct.id}')">Update</button></div>
+            <div class="item-actions"><button class="btn btn-ghost btn-sm" data-act="update-account" data-id="${esc(acct.id)}">Update</button></div>
           </div>
         </div>`).join("");
 
@@ -818,7 +819,7 @@ function renderFundsTab() {
         </div>
         <div class="item-right">
           <div class="item-amount" style="color:var(--green)">${fmtMoney(wf.latestCents)}</div>
-          <div class="item-actions"><button class="btn btn-ghost btn-sm" onclick="openUpdateFundModal('${fund.id}')">Update</button></div>
+          <div class="item-actions"><button class="btn btn-ghost btn-sm" data-act="update-fund" data-id="${esc(fund.id)}">Update</button></div>
         </div>
       </div>`;
   }).join("");
@@ -871,7 +872,7 @@ function renderGoalsTab() {
           </div>
           <div class="item-right">
             <div class="item-amount" style="color:var(--accent)">${fmtMoney(wg.latestCents)}</div>
-            ${meIsAdult ? `<div class="item-actions"><button class="btn btn-ghost btn-sm" onclick="openUpdateGoalModal('${goal.id}')">Update</button></div>` : ""}
+            ${meIsAdult ? `<div class="item-actions"><button class="btn btn-ghost btn-sm" data-act="update-goal" data-id="${esc(goal.id)}">Update</button></div>` : ""}
           </div>
         </div>`;
     }
@@ -911,6 +912,28 @@ function render() {
 }
 
 window.setTab = function(tab) { activeTab = tab; render(); };
+
+// Delegated handler for buttons carrying a DB-derived id. Row ids are
+// user-controllable (a child can INSERT a savings_goal with an attacker-chosen
+// id via raw /api/db), so they must never be interpolated into an inline
+// onclick — they are read back from data-id here instead. Covers both the
+// rendered lists (#root) and the modals (appended to <body>).
+document.body.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-act]");
+  if (!el) return;
+  const id = el.getAttribute("data-id");
+  switch (el.getAttribute("data-act")) {
+    case "update-account":        openUpdateAccountModal(id); break;
+    case "archive-account":       window.archiveAccount(id); break;
+    case "submit-update-account": window.submitUpdateAccount(id); break;
+    case "update-fund":           openUpdateFundModal(id); break;
+    case "archive-fund":          window.archiveFund(id); break;
+    case "submit-update-fund":    window.submitUpdateFund(id); break;
+    case "update-goal":           openUpdateGoalModal(id); break;
+    case "delete-goal":           window.deleteGoal(id); break;
+    case "submit-update-goal":    window.submitUpdateGoal(id); break;
+  }
+});
 window.openAddAccountModal    = openAddAccountModal;
 window.openUpdateAccountModal = openUpdateAccountModal;
 window.openAddFundModal       = openAddFundModal;
