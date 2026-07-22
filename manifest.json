@@ -1,5 +1,6 @@
 {
   "id": "nest-egg",
+  "contexts": ["household", "shared_space"],
   "name": "Nest Egg",
   "version": "1.0.0",
   "description": "Household financial overview — track net worth, savings goals, and named funds over time. Adults manage assets and liabilities; kids see their savings goals.",
