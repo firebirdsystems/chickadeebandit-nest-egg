@@ -17,6 +17,30 @@
     "requires_approval": false
   },
   "storage": "db",
+    "member_references": {
+      "savings_goals": {
+        "column": "member_id",
+        "on_removed": "delete",
+        "dependent_tables": [
+          {
+            "table": "goal_snapshots",
+            "foreign_key": "goal_id"
+          }
+        ]
+      },
+      "account_snapshots": {
+        "column": "recorded_by",
+        "on_removed": "keep"
+      },
+      "fund_snapshots": {
+        "column": "recorded_by",
+        "on_removed": "keep"
+      },
+      "goal_snapshots": {
+        "column": "recorded_by",
+        "on_removed": "keep"
+      }
+    },
   "row_policies": {
     "savings_goals": {
       "kind": "owner_or_visibility",
@@ -35,6 +59,11 @@
       "parent_table": "savings_goals",
       "writer_column": "recorded_by"
     }
+  },
+  "delete_cascades": {
+    "savings_goals": [
+      { "table": "goal_snapshots", "foreign_key": "goal_id" }
+    ]
   },
   "publish_acls": {
     "nest-egg.goal-reached": { "require_role": "adult" }
