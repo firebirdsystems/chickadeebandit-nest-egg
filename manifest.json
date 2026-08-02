@@ -69,6 +69,18 @@
     "nest-egg.goal-reached": { "require_role": "adult" }
   },
   "publishes": ["nest-egg.goal-reached"],
+  "glance": {
+    "source": {
+      "kind": "sql",
+      "query": "SELECT COUNT(*) AS n FROM app_nest_egg__savings_goals WHERE achieved_at IS NULL LIMIT 1"
+    },
+    "display": {
+      "template": "badge",
+      "count": "n",
+      "label": "savings goals in progress",
+      "severity": "info"
+    }
+  },
   "nav": { "label": "Nest Egg" },
   "widget": { "label": "Nest Egg", "size": "small" },
   "resource_limits": { "max_db_bytes": 104857600 },
