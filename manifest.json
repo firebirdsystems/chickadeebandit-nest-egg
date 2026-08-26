@@ -17,6 +17,14 @@
     "requires_approval": false
   },
   "storage": "db",
+  "preload": {
+    "savings_goals": {"sql": "SELECT * FROM app_nest_egg__savings_goals ORDER BY member_id, created_at"},
+    "goal_snapshots": {"sql": "SELECT * FROM app_nest_egg__goal_snapshots ORDER BY recorded_at DESC LIMIT 500"},
+    "accounts": {"sql": "SELECT * FROM app_nest_egg__accounts WHERE archived_at IS NULL ORDER BY type, category"},
+    "account_snapshots": {"sql": "SELECT * FROM app_nest_egg__account_snapshots ORDER BY recorded_at DESC LIMIT 500"},
+    "funds": {"sql": "SELECT * FROM app_nest_egg__funds WHERE archived_at IS NULL ORDER BY name"},
+    "fund_snapshots": {"sql": "SELECT * FROM app_nest_egg__fund_snapshots ORDER BY recorded_at DESC LIMIT 500"}
+  },
     "member_references": {
       "savings_goals": {
         "column": "member_id",
