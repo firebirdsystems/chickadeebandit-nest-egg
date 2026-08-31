@@ -837,7 +837,7 @@ function renderGoalsTab() {
 
   if (!visibleGoals.length) return `
     <div class="empty">${meIsAdult ? "No savings goals yet. Create goals for any household member." : "No savings goals to show yet."}</div>
-    ${meIsAdult ? `<div class="add-row"><button class="btn btn-ghost btn-sm" onclick="openAddGoalModal()">+ Add Goal</button></div>` : ""}`;
+    ${meIsAdult ? `<div class="add-row"><button class="btn btn-ghost btn-sm" onclick="openAddGoalModal()" data-testid="add-goal">+ Add Goal</button></div>` : ""}`;
 
   const memberIds = [...new Set(visibleGoals.map(g => g.member_id))];
   let html = "";
@@ -853,7 +853,7 @@ function renderGoalsTab() {
     for (const goal of visibleGoals.filter(g => g.member_id === mid)) {
       const wg = goalWithLatest(goal);
       const visBadge = meIsAdult
-        ? `<span class="vis-badge ${goal.visibility}" title="${goal.visibility === "everyone" ? "Visible to everyone" : "Adults only"}">${goal.visibility === "everyone" ? "🌍" : "🔒"}</span>`
+        ? `<span class="vis-badge ${goal.visibility}" data-testid="goal-visibility" data-goal-id="${esc(goal.id)}" title="${goal.visibility === "everyone" ? "Visible to everyone" : "Adults only"}">${goal.visibility === "everyone" ? "🌍" : "🔒"}</span>`
         : "";
       const achieved = goal.achieved_at
         ? `<div style="margin-top:4px"><span class="achieved-badge">🎉 Achieved ${fmtDate(goal.achieved_at)}</span></div>`
@@ -863,7 +863,7 @@ function renderGoalsTab() {
         : "";
 
       html += `
-        <div class="item-card">
+        <div class="item-card" data-testid="goal-card" data-goal-id="${esc(goal.id)}">
           <div class="item-icon">🎯</div>
           <div class="item-body">
             <div class="item-name">${esc(goal.name)}${visBadge}</div>
@@ -873,13 +873,13 @@ function renderGoalsTab() {
           </div>
           <div class="item-right">
             <div class="item-amount" style="color:var(--accent)">${fmtMoney(wg.latestCents)}</div>
-            ${meIsAdult ? `<div class="item-actions"><button class="btn btn-ghost btn-sm" data-act="update-goal" data-id="${esc(goal.id)}">Update</button></div>` : ""}
+            ${meIsAdult ? `<div class="item-actions"><button class="btn btn-ghost btn-sm" data-act="update-goal" data-id="${esc(goal.id)}" data-testid="goal-update" data-goal-id="${esc(goal.id)}">Update</button></div>` : ""}
           </div>
         </div>`;
     }
   }
 
-  if (meIsAdult) html += `<div class="add-row"><button class="btn btn-ghost btn-sm" onclick="openAddGoalModal()">+ Add Goal</button></div>`;
+  if (meIsAdult) html += `<div class="add-row"><button class="btn btn-ghost btn-sm" onclick="openAddGoalModal()" data-testid="add-goal">+ Add Goal</button></div>`;
   return html;
 }
 
@@ -894,9 +894,9 @@ function render() {
 
   const tabsHtml = meIsAdult ? `
     <div class="tabs">
-      <button class="tab ${activeTab === "networth" ? "active" : ""}" onclick="setTab('networth')">Net Worth</button>
-      <button class="tab ${activeTab === "funds"    ? "active" : ""}" onclick="setTab('funds')">Funds</button>
-      <button class="tab ${activeTab === "goals"    ? "active" : ""}" onclick="setTab('goals')">Goals</button>
+      <button class="tab ${activeTab === "networth" ? "active" : ""}" onclick="setTab('networth')" data-testid="tab-networth">Net Worth</button>
+      <button class="tab ${activeTab === "funds"    ? "active" : ""}" onclick="setTab('funds')" data-testid="tab-funds">Funds</button>
+      <button class="tab ${activeTab === "goals"    ? "active" : ""}" onclick="setTab('goals')" data-testid="tab-goals">Goals</button>
     </div>` : "";
 
   let content = "";

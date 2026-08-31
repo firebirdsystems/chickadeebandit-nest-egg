@@ -1,0 +1,40 @@
+{
+  "scenarios": [
+    {
+      "name": "a child gets only the goals tab, and no update control on a goal the hub would let them write",
+      "members": { "parent": "adult", "kid": "child" },
+      "steps": [
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, visibility, created_at) VALUES ('ui-goal-kid', ?, ?, 50000, 'everyone', datetime('now'))",
+          "params": ["{{kid}}", "New bike"]
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, visibility, created_at) VALUES ('ui-goal-parent', ?, ?, 250000, 'everyone', datetime('now'))",
+          "params": ["{{parent}}", "Kitchen fund"]
+        },
+
+        { "action": "open", "as": "kid" },
+        { "action": "expectVisible", "as": "kid", "selector": "[data-testid=\"goal-card\"][data-goal-id=\"ui-goal-kid\"]" },
+        { "action": "expectCount", "as": "kid", "selector": "[data-testid=\"goal-card\"]", "count": 2 },
+        { "action": "expectCount", "as": "kid", "selector": "[data-testid=\"tab-networth\"]", "count": 0 },
+        { "action": "expectCount", "as": "kid", "selector": "[data-testid=\"tab-funds\"]", "count": 0 },
+        { "action": "expectCount", "as": "kid", "selector": "[data-testid=\"goal-update\"]", "count": 0 },
+        { "action": "expectCount", "as": "kid", "selector": "[data-testid=\"add-goal\"]", "count": 0 },
+        { "action": "expectCount", "as": "kid", "selector": "[data-testid=\"goal-visibility\"]", "count": 0 },
+
+        { "action": "open", "as": "parent" },
+        { "action": "expectVisible", "as": "parent", "selector": "[data-testid=\"tab-networth\"]" },
+        { "action": "expectVisible", "as": "parent", "selector": "[data-testid=\"tab-funds\"]" },
+        { "action": "expectVisible", "as": "parent", "selector": "[data-testid=\"tab-goals\"]" },
+        { "action": "click", "as": "parent", "selector": "[data-testid=\"tab-goals\"]" },
+        { "action": "expectVisible", "as": "parent", "selector": "[data-testid=\"goal-card\"][data-goal-id=\"ui-goal-kid\"]" },
+        { "action": "expectCount", "as": "parent", "selector": "[data-testid=\"goal-card\"]", "count": 2 },
+        { "action": "expectCount", "as": "parent", "selector": "[data-testid=\"goal-update\"]", "count": 2 },
+        { "action": "expectVisible", "as": "parent", "selector": "[data-testid=\"add-goal\"]" },
+        { "action": "expectCount", "as": "parent", "selector": "[data-testid=\"goal-visibility\"]", "count": 2 }
+      ]
+    }
+  ]
+}
