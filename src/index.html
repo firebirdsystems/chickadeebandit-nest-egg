@@ -155,6 +155,7 @@ import {
   fmtMonthYear, fmtDate,
   latestOf, buildNetWorthHistory,
   categoryIcon, categoryLabel,
+  sortFunds,
 } from "./logic.js";
 
 const CONTEXT    = window.__CONTEXT_URL    ?? "";
@@ -219,14 +220,14 @@ async function loadAll() {
   const [a, as_, f, fs_, g, gs_] = await Promise.all([
     db(`SELECT * FROM app_nest_egg__accounts   WHERE archived_at IS NULL ORDER BY type, category`),
     db(`SELECT * FROM app_nest_egg__account_snapshots ORDER BY recorded_at DESC LIMIT 500`),
-    db(`SELECT * FROM app_nest_egg__funds       WHERE archived_at IS NULL ORDER BY name`),
+    db(`SELECT * FROM app_nest_egg__funds       WHERE archived_at IS NULL ORDER BY created_at`),
     db(`SELECT * FROM app_nest_egg__fund_snapshots    ORDER BY recorded_at DESC LIMIT 500`),
     db(`SELECT * FROM app_nest_egg__savings_goals ORDER BY member_id, created_at`),
     db(`SELECT * FROM app_nest_egg__goal_snapshots    ORDER BY recorded_at DESC LIMIT 500`),
   ]);
   accounts      = a.rows   ?? [];
   acctSnapshots = as_.rows ?? [];
-  funds         = f.rows   ?? [];
+  funds         = sortFunds(f.rows ?? []);
   fundSnapshots = fs_.rows ?? [];
   goals         = g.rows   ?? [];
   goalSnapshots = gs_.rows ?? [];
@@ -257,11 +258,12 @@ function loadDemoData() {
     { id: "as10", account_id: "l1", value_cents: 31200000, note: "",              recorded_by: "demo-1", recorded_at: mo2 },
     { id: "as11", account_id: "l2", value_cents:  1100000, note: "",              recorded_by: "demo-1", recorded_at: mo2 },
   ];
-  funds = [
+  // Sorted the same way the live path sorts, so demo mode shows the real order.
+  funds = sortFunds([
     { id: "f1", name: "Emergency Fund",      target_cents: 1500000, archived_at: null, created_at: mo1 },
     { id: "f2", name: "Vacation Fund",       target_cents:  500000, archived_at: null, created_at: mo1 },
     { id: "f3", name: "Home Repair Reserve", target_cents:      null, archived_at: null, created_at: mo1 },
-  ];
+  ]);
   fundSnapshots = [
     { id: "fs1", fund_id: "f1", balance_cents: 1200000, note: "", recorded_by: "demo-1", recorded_at: mo1 },
     { id: "fs2", fund_id: "f2", balance_cents:  180000, note: "", recorded_by: "demo-1", recorded_at: mo1 },

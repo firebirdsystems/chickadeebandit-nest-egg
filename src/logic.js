@@ -150,3 +150,21 @@ export function buildNetWorthHistory(accounts, allSnapshots) {
     return { month, netWorth: assets - liabilities };
   });
 }
+
+/**
+ * Funds in alphabetical order by name.
+ *
+ * `name` is encrypted at rest, and app-db encryption uses a fresh random IV per
+ * write, so `ORDER BY name` in SQL sorts AES ciphertext — an order that is not
+ * alphabetical, and that reshuffles on every write. The queries therefore order
+ * by created_at (plaintext via the _at suffix) and the alphabetical order is
+ * applied here, after the hub has decrypted the rows.
+ *
+ * Ties fall back to created_at so the order is stable when two funds share a
+ * name, rather than depending on however the rows arrived.
+ */
+export function sortFunds(funds) {
+  return [...funds].sort((a, b) =>
+    (a.name ?? "").localeCompare(b.name ?? "")
+    || (a.created_at ?? "").localeCompare(b.created_at ?? ""));
+}

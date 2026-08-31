@@ -4,7 +4,7 @@ import {
   calcNetWorth, calcProgress,
   fmtMonthYear, fmtDate,
   latestOf, priorOf, calcTrend,
-  buildNetWorthHistory,
+  buildNetWorthHistory, sortFunds,
 } from "../src/logic.js";
 
 describe("category helpers", () => {
@@ -122,5 +122,36 @@ describe("buildNetWorthHistory", () => {
       { account_id: "a1", recorded_at: "2026-02-01", value_cents: 2 },
     ];
     expect(buildNetWorthHistory(accounts, snapshots).map((h) => h.month)).toEqual(["2026-02", "2026-05"]);
+  });
+});
+
+describe("sortFunds", () => {
+  // The SQL orders by created_at because `name` is encrypted at rest; the
+  // alphabetical order the UI shows has to come from here, after decryption.
+  const rows = [
+    { id: "c", name: "Vacation Fund",       created_at: "2026-01-01" },
+    { id: "a", name: "Emergency Fund",      created_at: "2026-03-01" },
+    { id: "b", name: "Home Repair Reserve", created_at: "2026-02-01" },
+  ];
+
+  it("orders by name, not by the order the rows arrived in", () => {
+    expect(sortFunds(rows).map((f) => f.name))
+      .toEqual(["Emergency Fund", "Home Repair Reserve", "Vacation Fund"]);
+  });
+
+  it("breaks ties on created_at so equal names are stable", () => {
+    const tied = [
+      { id: "x", name: "Travel", created_at: "2026-05-01" },
+      { id: "y", name: "Travel", created_at: "2026-01-01" },
+    ];
+    expect(sortFunds(tied).map((f) => f.id)).toEqual(["y", "x"]);
+    expect(sortFunds([...tied].reverse()).map((f) => f.id)).toEqual(["y", "x"]);
+  });
+
+  it("does not mutate its input and tolerates a missing name", () => {
+    const input = [{ id: "b", name: "B", created_at: "1" }, { id: "a", created_at: "0" }];
+    const before = [...input];
+    expect(sortFunds(input).map((f) => f.id)).toEqual(["a", "b"]);
+    expect(input).toEqual(before);
   });
 });
