@@ -19,8 +19,8 @@
     .amount.positive { color: #16a34a; }
     .amount.negative { color: #dc2626; }
     .trend { display: inline-flex; align-items: center; gap: 3px; font-size: 0.72rem; font-weight: 600; padding: 1px 6px; border-radius: 12px; margin-top: 4px; }
-    .trend.up   { background: #dcfce7; color: #16a34a; }
-    .trend.down { background: #fee2e2; color: #dc2626; }
+    .trend.up   { background: var(--hub-tint-success, #dcfce7); color: var(--hub-tint-success-fg, #16a34a); }
+    .trend.down { background: var(--hub-tint-danger, #fee2e2); color: var(--hub-tint-danger-fg, #dc2626); }
     .trend.flat { background: var(--hub-border, #e5e7eb); color: var(--hub-text-muted, #6b7280); }
     .goal-name { font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .progress-bar { height: 5px; background: var(--hub-border, #e5e7eb); border-radius: 3px; overflow: hidden; }
