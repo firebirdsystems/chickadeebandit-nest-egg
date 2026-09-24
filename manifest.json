@@ -55,6 +55,7 @@
       "member_column": "member_id",
       "visibility_column": "visibility",
       "everyone_values": ["everyone"],
+      "supervisor_assigns_owner": true,
       "adult_values": ["adults", "everyone"]
     },
     "accounts": { "kind": "adult_only" },

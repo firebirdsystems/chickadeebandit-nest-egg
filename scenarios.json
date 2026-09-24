@@ -1,0 +1,272 @@
+{
+  "scenarios": [
+    {
+      "name": "accounts, funds and their snapshots are adults-only; a child can neither read nor write them",
+      "members": {
+        "parent": "adult",
+        "kid": "child"
+      },
+      "steps": [
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES ('acct-1', 'Mortgage', 'mortgage', 'liability', '2026-01-01T00:00:00Z')"
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES ('as-1', 'acct-1', 30000000, ?, '2026-01-02T00:00:00Z')",
+          "params": [
+            "{{parent}}"
+          ]
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_nest_egg__funds (id, name, target_cents, created_at) VALUES ('fund-1', 'Emergency', 1000000, '2026-01-01T00:00:00Z')"
+        },
+        {
+          "action": "db",
+          "as": "parent",
+          "sql": "SELECT id FROM app_nest_egg__accounts",
+          "expect": {
+            "status": 200,
+            "rowCount": 1,
+            "rowsContain": [
+              {
+                "id": "acct-1"
+              }
+            ]
+          }
+        },
+        {
+          "action": "db",
+          "as": "parent",
+          "sql": "SELECT id, value_cents FROM app_nest_egg__account_snapshots",
+          "expect": {
+            "status": 200,
+            "rowCount": 1,
+            "rowsContain": [
+              {
+                "id": "as-1",
+                "value_cents": 30000000
+              }
+            ]
+          }
+        },
+        {
+          "action": "db",
+          "as": "kid",
+          "sql": "SELECT id FROM app_nest_egg__accounts",
+          "expect": {
+            "status": 403
+          }
+        },
+        {
+          "action": "db",
+          "as": "kid",
+          "sql": "SELECT id FROM app_nest_egg__account_snapshots",
+          "expect": {
+            "status": 403
+          }
+        },
+        {
+          "action": "db",
+          "as": "kid",
+          "sql": "SELECT id FROM app_nest_egg__funds",
+          "expect": {
+            "status": 403
+          }
+        },
+        {
+          "action": "db",
+          "as": "kid",
+          "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?)",
+          "params": [
+            "fs-kid",
+            "fund-1",
+            99999999,
+            "{{kid}}",
+            "2026-01-03T00:00:00Z"
+          ],
+          "expect": {
+            "status": 403
+          }
+        },
+        {
+          "action": "db",
+          "as": "parent",
+          "sql": "SELECT id FROM app_nest_egg__fund_snapshots",
+          "expect": {
+            "status": 200,
+            "rowCount": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "a child sees their own goals and everyone goals, never a sibling's adults-only goal; snapshots follow the goal",
+      "members": {
+        "parent": "adult",
+        "kidA": "child",
+        "kidB": "child"
+      },
+      "steps": [
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, visibility, created_at) VALUES ('g-a-own', ?, 'Bike', 50000, 'adults', '2026-01-01T00:00:00Z'), ('g-b-private', ?, 'Surprise gift', 20000, 'adults', '2026-01-01T00:00:00Z'), ('g-family', ?, 'Vacation', 500000, 'everyone', '2026-01-01T00:00:00Z')",
+          "params": [
+            "{{kidA}}",
+            "{{kidB}}",
+            "{{parent}}"
+          ]
+        },
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES ('s-a', 'g-a-own', 1000, ?, '2026-01-02T00:00:00Z'), ('s-b', 'g-b-private', 2000, ?, '2026-01-02T00:00:00Z'), ('s-fam', 'g-family', 3000, ?, '2026-01-02T00:00:00Z')",
+          "params": [
+            "{{parent}}",
+            "{{parent}}",
+            "{{parent}}"
+          ]
+        },
+        {
+          "action": "db",
+          "as": "kidA",
+          "sql": "SELECT id FROM app_nest_egg__savings_goals ORDER BY id",
+          "expect": {
+            "status": 200,
+            "rowCount": 2,
+            "rowsContain": [
+              {
+                "id": "g-a-own"
+              },
+              {
+                "id": "g-family"
+              }
+            ]
+          }
+        },
+        {
+          "action": "db",
+          "as": "kidA",
+          "sql": "SELECT id FROM app_nest_egg__goal_snapshots ORDER BY id",
+          "expect": {
+            "status": 200,
+            "rowCount": 2,
+            "rowsContain": [
+              {
+                "id": "s-a"
+              },
+              {
+                "id": "s-fam"
+              }
+            ]
+          }
+        },
+        {
+          "action": "db",
+          "as": "parent",
+          "sql": "SELECT id FROM app_nest_egg__savings_goals ORDER BY id",
+          "expect": {
+            "status": 200,
+            "rowCount": 3
+          }
+        },
+        {
+          "action": "db",
+          "as": "parent",
+          "sql": "SELECT id FROM app_nest_egg__goal_snapshots ORDER BY id",
+          "expect": {
+            "status": 200,
+            "rowCount": 3
+          }
+        }
+      ]
+    },
+    {
+      "name": "only an adult may announce a reached savings goal",
+      "members": {
+        "parent": "adult",
+        "kid": "child"
+      },
+      "steps": [
+        {
+          "action": "publish",
+          "as": "kid",
+          "type": "nest-egg.goal-reached",
+          "subject_id": "{{kid}}",
+          "payload": {
+            "goal_id": "g1",
+            "goal_name": "Bike",
+            "target_cents": 50000
+          },
+          "expect": {
+            "status": 403
+          }
+        },
+        {
+          "action": "publish",
+          "as": "parent",
+          "type": "nest-egg.goal-reached",
+          "subject_id": "{{kid}}",
+          "payload": {
+            "goal_id": "g1",
+            "goal_name": "Bike",
+            "target_cents": 50000
+          },
+          "expect": {
+            "status": 201
+          }
+        }
+      ]
+    },
+    {
+      "name": "a goal a parent creates for a kid belongs to the kid, who can see it",
+      "members": {
+        "parent": "adult",
+        "kid": "child"
+      },
+      "steps": [
+        {
+          "action": "db",
+          "as": "parent",
+          "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, visibility, created_at) VALUES ('g1', ?, 'Skateboard', 12000, 'adults', '2026-01-01T00:00:00Z')",
+          "params": [
+            "{{kid}}"
+          ],
+          "expect": {
+            "status": 200
+          }
+        },
+        {
+          "action": "db",
+          "as": "kid",
+          "sql": "SELECT id, name FROM app_nest_egg__savings_goals WHERE member_id = ?",
+          "params": [
+            "{{kid}}"
+          ],
+          "expect": {
+            "status": 200,
+            "rowCount": 1,
+            "rowsContain": [
+              {
+                "id": "g1",
+                "name": "Skateboard"
+              }
+            ]
+          }
+        },
+        {
+          "action": "db",
+          "as": "parent",
+          "sql": "SELECT id FROM app_nest_egg__savings_goals WHERE member_id = ?",
+          "params": [
+            "{{parent}}"
+          ],
+          "expect": {
+            "status": 200,
+            "rowCount": 0
+          }
+        }
+      ]
+    }
+  ]
+}
