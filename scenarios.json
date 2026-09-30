@@ -267,6 +267,100 @@
           }
         }
       ]
+    },
+    {
+      "name": "in a general shared space only the steward creates a goal for another member; a participant adult's goal is stamped as their own",
+      "context": "shared_space",
+      "members": { "a": "adult", "b": "adult", "steward": "admin" },
+      "steps": [
+        {
+          "action": "db",
+          "as": "a",
+          "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, visibility, created_at) VALUES ('g-a', ?, 'Bike', 30000, 'adults', '2026-01-01T00:00:00Z')",
+          "params": ["{{b}}"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "db",
+          "as": "steward",
+          "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, visibility, created_at) VALUES ('g-s', ?, 'Trip', 50000, 'adults', '2026-01-01T00:00:00Z')",
+          "params": ["{{b}}"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "db",
+          "as": "steward",
+          "sql": "SELECT id, member_id FROM app_nest_egg__savings_goals ORDER BY id",
+          "params": [],
+          "expect": {
+            "status": 200,
+            "rowCount": 2,
+            "rowsContain": [{ "id": "g-a", "member_id": "scn-a" }, { "id": "g-s", "member_id": "scn-b" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "in a shared space a participant adult cannot edit or remove another member's goal; the steward can",
+      "context": "shared_space",
+      "members": { "a": "adult", "b": "adult", "steward": "admin" },
+      "steps": [
+        {
+          "action": "seedRaw",
+          "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, visibility, created_at) VALUES ('g1', ?, 'Bike', 30000, 'everyone', '2026-01-01T00:00:00Z'), ('g2', ?, 'Trip', 50000, 'everyone', '2026-01-01T00:00:00Z')",
+          "params": ["{{a}}", "{{a}}"]
+        },
+        {
+          "action": "db",
+          "as": "b",
+          "sql": "UPDATE app_nest_egg__savings_goals SET target_cents = ? WHERE id = ?",
+          "params": [1, "g1"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "db",
+          "as": "b",
+          "sql": "DELETE FROM app_nest_egg__savings_goals WHERE id = ?",
+          "params": ["g2"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "db",
+          "as": "a",
+          "sql": "SELECT id, target_cents FROM app_nest_egg__savings_goals ORDER BY id",
+          "params": [],
+          "expect": {
+            "status": 200,
+            "rowCount": 2,
+            "rowsContain": [{ "id": "g1", "target_cents": 30000 }, { "id": "g2", "target_cents": 50000 }]
+          }
+        },
+        {
+          "action": "db",
+          "as": "steward",
+          "sql": "UPDATE app_nest_egg__savings_goals SET achieved_at = ? WHERE id = ?",
+          "params": ["2026-02-01T00:00:00Z", "g1"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "db",
+          "as": "steward",
+          "sql": "DELETE FROM app_nest_egg__savings_goals WHERE id = ?",
+          "params": ["g2"],
+          "expect": { "status": 200 }
+        },
+        {
+          "action": "db",
+          "as": "a",
+          "sql": "SELECT id, achieved_at FROM app_nest_egg__savings_goals ORDER BY id",
+          "params": [],
+          "expect": {
+            "status": 200,
+            "rowCount": 1,
+            "rowsContain": [{ "id": "g1", "achieved_at": "2026-02-01T00:00:00Z" }]
+          }
+        }
+      ]
     }
   ]
 }
