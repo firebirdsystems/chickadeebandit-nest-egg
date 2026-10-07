@@ -149,12 +149,12 @@
 </div>
 
 <script type="module">
-import { memberColor, initial, esc, isAdult, hubConfirm, fmtMoney, fmtMoneyShort } from "/hub-sdk.js";
+import { memberColor, initial, esc, isAdult, hubConfirm, fmtMoney, fmtMoneyShort, glyph } from "/hub-sdk.js";
 import {
   calcNetWorth, calcProgress, calcTrend,
   fmtMonthYear, fmtDate,
   latestOf, buildNetWorthHistory,
-  categoryIcon, categoryLabel,
+  categoryGlyph, categoryLabel,
   sortFunds,
 } from "./logic.js";
 
@@ -407,7 +407,7 @@ function openUpdateAccountModal(acctId) {
   const acct = accounts.find(a => a.id === acctId); if (!acct) return;
   const wa = accountWithLatest(acct);
   openModal(`
-    <h3>${categoryIcon(acct.category)} Update ${esc(acct.name)}</h3>
+    <h3>${glyph(categoryGlyph(acct.category))} Update ${esc(acct.name)}</h3>
     <div style="font-size:.85rem;color:var(--muted);margin-bottom:14px">
       Current: <strong>${fmtMoney(wa.latestCents)}</strong>${wa.latestSnap ? ` · ${fmtDate(wa.latestSnap.recorded_at)}` : ""}
     </div>
@@ -513,7 +513,7 @@ function openUpdateFundModal(fundId) {
   const fund = funds.find(f => f.id === fundId); if (!fund) return;
   const wf = fundWithLatest(fund);
   openModal(`
-    <h3>💰 Update ${esc(fund.name)}</h3>
+    <h3>${glyph("coins")} Update ${esc(fund.name)}</h3>
     <div style="font-size:.85rem;color:var(--muted);margin-bottom:14px">
       Current: <strong>${fmtMoney(wf.latestCents)}</strong>${wf.latestSnap ? ` · ${fmtDate(wf.latestSnap.recorded_at)}` : ""}
     </div>
@@ -661,7 +661,7 @@ function openUpdateGoalModal(goalId) {
   const wg = goalWithLatest(goal);
   const member = members.find(m => m.id === goal.member_id);
   openModal(`
-    <h3>🎯 Update ${esc(goal.name)}</h3>
+    <h3>${glyph("goal-ring")} Update ${esc(goal.name)}</h3>
     <div style="font-size:.85rem;color:var(--muted);margin-bottom:14px">
       For <strong>${esc(member?.name ?? "?")}</strong> · Target: <strong>${fmtMoney(goal.target_cents)}</strong> · Saved: <strong>${fmtMoney(wg.latestCents)}</strong>
     </div>
@@ -776,7 +776,7 @@ function renderNetWorthTab() {
     ? `<div class="empty" style="padding:16px 0">None added yet.</div>`
     : list.map(acct => `
         <div class="item-card">
-          <div class="item-icon">${categoryIcon(acct.category)}</div>
+          <div class="item-icon">${glyph(categoryGlyph(acct.category))}</div>
           <div class="item-body">
             <div class="item-name">${esc(acct.name)}</div>
             <div class="item-sub">${categoryLabel(acct.category)}${acct.latestSnap ? ` · Updated ${fmtMonthYear(acct.latestSnap.recorded_at)}` : ""}</div>
@@ -814,7 +814,7 @@ function renderFundsTab() {
     const wf = fundWithLatest(fund);
     return `
       <div class="item-card">
-        <div class="item-icon">💰</div>
+        <div class="item-icon">${glyph("coins")}</div>
         <div class="item-body">
           <div class="item-name">${esc(fund.name)}</div>
           <div class="item-sub">${wf.latestSnap ? `Updated ${fmtMonthYear(wf.latestSnap.recorded_at)}` : "No data yet"}</div>
@@ -855,10 +855,10 @@ function renderGoalsTab() {
     for (const goal of visibleGoals.filter(g => g.member_id === mid)) {
       const wg = goalWithLatest(goal);
       const visBadge = meIsAdult
-        ? `<span class="vis-badge ${goal.visibility}" data-testid="goal-visibility" data-goal-id="${esc(goal.id)}" title="${goal.visibility === "everyone" ? "Visible to everyone" : "Adults only"}">${goal.visibility === "everyone" ? "🌍" : "🔒"}</span>`
+        ? `<span class="vis-badge ${goal.visibility}" data-testid="goal-visibility" data-goal-id="${esc(goal.id)}" title="${goal.visibility === "everyone" ? "Visible to everyone" : "Adults only"}">${goal.visibility === "everyone" ? glyph("people") : glyph("lock")}</span>`
         : "";
       const achieved = goal.achieved_at
-        ? `<div style="margin-top:4px"><span class="achieved-badge">🎉 Achieved ${fmtDate(goal.achieved_at)}</span></div>`
+        ? `<div style="margin-top:4px"><span class="achieved-badge">${glyph("star")} Achieved ${fmtDate(goal.achieved_at)}</span></div>`
         : "";
       const targetDate = goal.target_date && !goal.achieved_at
         ? ` · By ${fmtDate(goal.target_date)}`
@@ -866,7 +866,7 @@ function renderGoalsTab() {
 
       html += `
         <div class="item-card" data-testid="goal-card" data-goal-id="${esc(goal.id)}">
-          <div class="item-icon">🎯</div>
+          <div class="item-icon">${glyph("goal-ring")}</div>
           <div class="item-body">
             <div class="item-name">${esc(goal.name)}${visBadge}</div>
             <div class="item-sub">${wg.latestSnap ? `Updated ${fmtMonthYear(wg.latestSnap.recorded_at)}` : "No data"}${targetDate}</div>
@@ -908,7 +908,7 @@ function render() {
 
   document.getElementById("root").innerHTML = `
     <header>
-      <div><h1>🪺 Nest Egg</h1><div class="sub">Household finances</div></div>
+      <div><h1>${glyph("egg")} Nest Egg</h1><div class="sub">Household finances</div></div>
     </header>
     ${tabsHtml}
     <div id="tab-content">${content}</div>`;

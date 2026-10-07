@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  categoryIcon, categoryLabel,
+  categoryGlyph, categoryLabel,
   calcNetWorth, calcProgress,
   fmtMonthYear, fmtDate,
   latestOf, priorOf, calcTrend,
@@ -9,8 +9,8 @@ import {
 
 describe("category helpers", () => {
   it("maps known categories and falls back for unknown", () => {
-    expect(categoryIcon("home")).toBe("🏠");
-    expect(categoryIcon("nope")).toBe("💼");
+    expect(categoryGlyph("home")).toBe("house");
+    expect(categoryGlyph("nope")).toBe("toolbox");
     expect(categoryLabel("credit_card")).toBe("Credit Card");
     expect(categoryLabel("nope")).toBe("nope");
   });

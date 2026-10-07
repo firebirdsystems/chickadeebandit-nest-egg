@@ -8,7 +8,7 @@ import {
   priorOf,
   calcTrend,
   buildNetWorthHistory,
-  categoryIcon,
+  categoryGlyph,
   categoryLabel,
 } from "../src/logic.js";
 
@@ -175,16 +175,16 @@ describe("buildNetWorthHistory", () => {
   });
 });
 
-describe("categoryIcon / categoryLabel", () => {
-  it("returns known icons", () => {
-    expect(categoryIcon("home")).toBe("🏠");
-    expect(categoryIcon("mortgage")).toBe("🏠");
-    expect(categoryIcon("investment")).toBe("📈");
-    expect(categoryIcon("credit_card")).toBe("💳");
+describe("categoryGlyph / categoryLabel", () => {
+  it("returns known glyph names", () => {
+    expect(categoryGlyph("home")).toBe("house");
+    expect(categoryGlyph("mortgage")).toBe("house");
+    expect(categoryGlyph("investment")).toBe("coins");
+    expect(categoryGlyph("credit_card")).toBe("card");
   });
 
-  it("returns fallback icon for unknown category", () => {
-    expect(categoryIcon("mystery")).toBe("💼");
+  it("returns fallback glyph for unknown category", () => {
+    expect(categoryGlyph("mystery")).toBe("toolbox");
   });
 
   it("returns known labels", () => {

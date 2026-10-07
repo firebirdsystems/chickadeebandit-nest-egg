@@ -3,18 +3,18 @@
  * No DOM, no fetch — safe to unit-test in Node.
  */
 
-const CATEGORY_ICONS = {
-  home:              "🏠",
-  investment:        "📈",
-  savings:           "💰",
-  checking:          "🏦",
-  vehicle:           "🚗",
-  other_asset:       "💎",
-  mortgage:          "🏠",
-  auto_loan:         "🚗",
-  student_loan:      "🎓",
-  credit_card:       "💳",
-  other_liability:   "📋",
+const CATEGORY_GLYPHS = {
+  home:              "house",
+  investment:        "coins",
+  savings:           "piggy",
+  checking:          "bank",
+  vehicle:           "car",
+  other_asset:       "sparkles",
+  mortgage:          "house",
+  auto_loan:         "car",
+  student_loan:      "graduation",
+  credit_card:       "card",
+  other_liability:   "document",
 };
 
 const CATEGORY_LABELS = {
@@ -31,8 +31,8 @@ const CATEGORY_LABELS = {
   other_liability:   "Other Liability",
 };
 
-export function categoryIcon(category) {
-  return CATEGORY_ICONS[category] ?? "💼";
+export function categoryGlyph(category) {
+  return CATEGORY_GLYPHS[category] ?? "toolbox";
 }
 
 export function categoryLabel(category) {
