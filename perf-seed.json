@@ -1,0 +1,1783 @@
+{
+  "seed": [
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+0 minutes'))",
+      "params": [
+        "perf-acct-01",
+        "House",
+        "home",
+        "asset"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-180 days','-0 minutes'))",
+      "params": [
+        "perf-asnap-001",
+        "perf-acct-01",
+        48500000,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-145 days','-0 minutes'))",
+      "params": [
+        "perf-asnap-002",
+        "perf-acct-01",
+        48650131,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-110 days','-0 minutes'))",
+      "params": [
+        "perf-asnap-003",
+        "perf-acct-01",
+        48800262,
+        "Zillow estimate",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-75 days','-0 minutes'))",
+      "params": [
+        "perf-asnap-004",
+        "perf-acct-01",
+        48950393,
+        "Month-end check",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-40 days','-0 minutes'))",
+      "params": [
+        "perf-asnap-005",
+        "perf-acct-01",
+        49100524,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','-0 minutes'))",
+      "params": [
+        "perf-asnap-006",
+        "perf-acct-01",
+        49250655,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+1 minutes'))",
+      "params": [
+        "perf-acct-02",
+        "401(k) - Alex",
+        "investment",
+        "asset"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-181 days','-7 minutes'))",
+      "params": [
+        "perf-asnap-007",
+        "perf-acct-02",
+        11200977,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-146 days','-7 minutes'))",
+      "params": [
+        "perf-asnap-008",
+        "perf-acct-02",
+        11361108,
+        "Zillow estimate",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-111 days','-7 minutes'))",
+      "params": [
+        "perf-asnap-009",
+        "perf-acct-02",
+        11521239,
+        "Month-end check",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-76 days','-7 minutes'))",
+      "params": [
+        "perf-asnap-010",
+        "perf-acct-02",
+        11681370,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-41 days','-7 minutes'))",
+      "params": [
+        "perf-asnap-011",
+        "perf-acct-02",
+        11841501,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','-7 minutes'))",
+      "params": [
+        "perf-asnap-012",
+        "perf-acct-02",
+        12001632,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+2 minutes'))",
+      "params": [
+        "perf-acct-03",
+        "401(k) - Jordan",
+        "investment",
+        "asset"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-182 days','-14 minutes'))",
+      "params": [
+        "perf-asnap-013",
+        "perf-acct-03",
+        8701954,
+        "Zillow estimate",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-147 days','-14 minutes'))",
+      "params": [
+        "perf-asnap-014",
+        "perf-acct-03",
+        8832085,
+        "Month-end check",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-112 days','-14 minutes'))",
+      "params": [
+        "perf-asnap-015",
+        "perf-acct-03",
+        8962216,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-77 days','-14 minutes'))",
+      "params": [
+        "perf-asnap-016",
+        "perf-acct-03",
+        9092347,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-42 days','-14 minutes'))",
+      "params": [
+        "perf-asnap-017",
+        "perf-acct-03",
+        9222478,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-7 days','-14 minutes'))",
+      "params": [
+        "perf-asnap-018",
+        "perf-acct-03",
+        9352609,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+3 minutes'))",
+      "params": [
+        "perf-acct-04",
+        "Roth IRA",
+        "investment",
+        "asset"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-183 days','-21 minutes'))",
+      "params": [
+        "perf-asnap-019",
+        "perf-acct-04",
+        3102931,
+        "Month-end check",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-148 days','-21 minutes'))",
+      "params": [
+        "perf-asnap-020",
+        "perf-acct-04",
+        3163062,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-113 days','-21 minutes'))",
+      "params": [
+        "perf-asnap-021",
+        "perf-acct-04",
+        3223193,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-78 days','-21 minutes'))",
+      "params": [
+        "perf-asnap-022",
+        "perf-acct-04",
+        3283324,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-43 days','-21 minutes'))",
+      "params": [
+        "perf-asnap-023",
+        "perf-acct-04",
+        3343455,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-8 days','-21 minutes'))",
+      "params": [
+        "perf-asnap-024",
+        "perf-acct-04",
+        3403586,
+        "Zillow estimate",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+4 minutes'))",
+      "params": [
+        "perf-acct-05",
+        "Emergency savings",
+        "savings",
+        "asset"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-180 days','-28 minutes'))",
+      "params": [
+        "perf-asnap-025",
+        "perf-acct-05",
+        1803908,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-145 days','-28 minutes'))",
+      "params": [
+        "perf-asnap-026",
+        "perf-acct-05",
+        1829039,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-110 days','-28 minutes'))",
+      "params": [
+        "perf-asnap-027",
+        "perf-acct-05",
+        1854170,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-75 days','-28 minutes'))",
+      "params": [
+        "perf-asnap-028",
+        "perf-acct-05",
+        1879301,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-40 days','-28 minutes'))",
+      "params": [
+        "perf-asnap-029",
+        "perf-acct-05",
+        1904432,
+        "Zillow estimate",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','-28 minutes'))",
+      "params": [
+        "perf-asnap-030",
+        "perf-acct-05",
+        1929563,
+        "Month-end check",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+5 minutes'))",
+      "params": [
+        "perf-acct-06",
+        "Joint checking",
+        "checking",
+        "asset"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-181 days','-35 minutes'))",
+      "params": [
+        "perf-asnap-031",
+        "perf-acct-06",
+        644885,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-146 days','-35 minutes'))",
+      "params": [
+        "perf-asnap-032",
+        "perf-acct-06",
+        633016,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-111 days','-35 minutes'))",
+      "params": [
+        "perf-asnap-033",
+        "perf-acct-06",
+        621147,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-76 days','-35 minutes'))",
+      "params": [
+        "perf-asnap-034",
+        "perf-acct-06",
+        609278,
+        "Zillow estimate",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-41 days','-35 minutes'))",
+      "params": [
+        "perf-asnap-035",
+        "perf-acct-06",
+        597409,
+        "Month-end check",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','-35 minutes'))",
+      "params": [
+        "perf-asnap-036",
+        "perf-acct-06",
+        585540,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+6 minutes'))",
+      "params": [
+        "perf-acct-07",
+        "Minivan",
+        "vehicle",
+        "asset"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-182 days','-42 minutes'))",
+      "params": [
+        "perf-asnap-037",
+        "perf-acct-07",
+        2105862,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-147 days','-42 minutes'))",
+      "params": [
+        "perf-asnap-038",
+        "perf-acct-07",
+        2075993,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-112 days','-42 minutes'))",
+      "params": [
+        "perf-asnap-039",
+        "perf-acct-07",
+        2046124,
+        "Zillow estimate",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-77 days','-42 minutes'))",
+      "params": [
+        "perf-asnap-040",
+        "perf-acct-07",
+        2016255,
+        "Month-end check",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-42 days','-42 minutes'))",
+      "params": [
+        "perf-asnap-041",
+        "perf-acct-07",
+        1986386,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-7 days','-42 minutes'))",
+      "params": [
+        "perf-asnap-042",
+        "perf-acct-07",
+        1956517,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+7 minutes'))",
+      "params": [
+        "perf-acct-08",
+        "Coin collection",
+        "other_asset",
+        "asset"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-183 days','-49 minutes'))",
+      "params": [
+        "perf-asnap-043",
+        "perf-acct-08",
+        356839,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-148 days','-49 minutes'))",
+      "params": [
+        "perf-asnap-044",
+        "perf-acct-08",
+        356970,
+        "Zillow estimate",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-113 days','-49 minutes'))",
+      "params": [
+        "perf-asnap-045",
+        "perf-acct-08",
+        357101,
+        "Month-end check",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-78 days','-49 minutes'))",
+      "params": [
+        "perf-asnap-046",
+        "perf-acct-08",
+        357232,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-43 days','-49 minutes'))",
+      "params": [
+        "perf-asnap-047",
+        "perf-acct-08",
+        357363,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-8 days','-49 minutes'))",
+      "params": [
+        "perf-asnap-048",
+        "perf-acct-08",
+        357494,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+8 minutes'))",
+      "params": [
+        "perf-acct-09",
+        "Mortgage",
+        "mortgage",
+        "liability"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-180 days','-56 minutes'))",
+      "params": [
+        "perf-asnap-049",
+        "perf-acct-09",
+        31207816,
+        "Zillow estimate",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-145 days','-56 minutes'))",
+      "params": [
+        "perf-asnap-050",
+        "perf-acct-09",
+        31112947,
+        "Month-end check",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-110 days','-56 minutes'))",
+      "params": [
+        "perf-asnap-051",
+        "perf-acct-09",
+        31018078,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-75 days','-56 minutes'))",
+      "params": [
+        "perf-asnap-052",
+        "perf-acct-09",
+        30923209,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-40 days','-56 minutes'))",
+      "params": [
+        "perf-asnap-053",
+        "perf-acct-09",
+        30828340,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','-56 minutes'))",
+      "params": [
+        "perf-asnap-054",
+        "perf-acct-09",
+        30733471,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+9 minutes'))",
+      "params": [
+        "perf-acct-10",
+        "Car loan",
+        "auto_loan",
+        "liability"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-181 days','-63 minutes'))",
+      "params": [
+        "perf-asnap-055",
+        "perf-acct-10",
+        1458793,
+        "Month-end check",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-146 days','-63 minutes'))",
+      "params": [
+        "perf-asnap-056",
+        "perf-acct-10",
+        1417924,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-111 days','-63 minutes'))",
+      "params": [
+        "perf-asnap-057",
+        "perf-acct-10",
+        1368055,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-76 days','-63 minutes'))",
+      "params": [
+        "perf-asnap-058",
+        "perf-acct-10",
+        1327186,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-41 days','-63 minutes'))",
+      "params": [
+        "perf-asnap-059",
+        "perf-acct-10",
+        1286317,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','-63 minutes'))",
+      "params": [
+        "perf-asnap-060",
+        "perf-acct-10",
+        1245448,
+        "Zillow estimate",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+10 minutes'))",
+      "params": [
+        "perf-acct-11",
+        "Student loan - Jordan",
+        "student_loan",
+        "liability"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-182 days','-70 minutes'))",
+      "params": [
+        "perf-asnap-061",
+        "perf-acct-11",
+        980770,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-147 days','-70 minutes'))",
+      "params": [
+        "perf-asnap-062",
+        "perf-acct-11",
+        952901,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-112 days','-70 minutes'))",
+      "params": [
+        "perf-asnap-063",
+        "perf-acct-11",
+        925032,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-77 days','-70 minutes'))",
+      "params": [
+        "perf-asnap-064",
+        "perf-acct-11",
+        897163,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-42 days','-70 minutes'))",
+      "params": [
+        "perf-asnap-065",
+        "perf-acct-11",
+        869294,
+        "Zillow estimate",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-7 days','-70 minutes'))",
+      "params": [
+        "perf-asnap-066",
+        "perf-acct-11",
+        841425,
+        "Month-end check",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+11 minutes'))",
+      "params": [
+        "perf-acct-12",
+        "Visa card",
+        "credit_card",
+        "liability"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-183 days','-77 minutes'))",
+      "params": [
+        "perf-asnap-067",
+        "perf-acct-12",
+        211747,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-148 days','-77 minutes'))",
+      "params": [
+        "perf-asnap-068",
+        "perf-acct-12",
+        220878,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-113 days','-77 minutes'))",
+      "params": [
+        "perf-asnap-069",
+        "perf-acct-12",
+        230009,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-78 days','-77 minutes'))",
+      "params": [
+        "perf-asnap-070",
+        "perf-acct-12",
+        239140,
+        "Zillow estimate",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-43 days','-77 minutes'))",
+      "params": [
+        "perf-asnap-071",
+        "perf-acct-12",
+        248271,
+        "Month-end check",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-8 days','-77 minutes'))",
+      "params": [
+        "perf-asnap-072",
+        "perf-acct-12",
+        257402,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__accounts (id, name, category, type, archived_at, created_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-70 days'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-185 days','+12 minutes'))",
+      "params": [
+        "perf-acct-13",
+        "Old brokerage account",
+        "investment",
+        "asset"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-180 days','-84 minutes'))",
+      "params": [
+        "perf-asnap-073",
+        "perf-acct-13",
+        402724,
+        "Statement balance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-140 days','-84 minutes'))",
+      "params": [
+        "perf-asnap-074",
+        "perf-acct-13",
+        402855,
+        "After the quarterly contribution",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__funds (id, name, target_cents, created_at) VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-184 days','+0 minutes'))",
+      "params": [
+        "perf-fund-01",
+        "Vacation fund",
+        600000
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-178 days','-0 minutes'))",
+      "params": [
+        "perf-fsnap-001",
+        "perf-fund-01",
+        120000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-143 days','-0 minutes'))",
+      "params": [
+        "perf-fsnap-002",
+        "perf-fund-01",
+        180000,
+        "Monthly transfer",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-108 days','-0 minutes'))",
+      "params": [
+        "perf-fsnap-003",
+        "perf-fund-01",
+        240000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-73 days','-0 minutes'))",
+      "params": [
+        "perf-fsnap-004",
+        "perf-fund-01",
+        300000,
+        "Monthly transfer",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-38 days','-0 minutes'))",
+      "params": [
+        "perf-fsnap-005",
+        "perf-fund-01",
+        360000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-3 days','-0 minutes'))",
+      "params": [
+        "perf-fsnap-006",
+        "perf-fund-01",
+        420000,
+        "Monthly transfer",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__funds (id, name, target_cents, created_at) VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-184 days','+1 minutes'))",
+      "params": [
+        "perf-fund-02",
+        "Home repairs",
+        1000000
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-179 days','-5 minutes'))",
+      "params": [
+        "perf-fsnap-007",
+        "perf-fund-02",
+        310000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-144 days','-5 minutes'))",
+      "params": [
+        "perf-fsnap-008",
+        "perf-fund-02",
+        355000,
+        "Monthly transfer",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-109 days','-5 minutes'))",
+      "params": [
+        "perf-fsnap-009",
+        "perf-fund-02",
+        400000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-74 days','-5 minutes'))",
+      "params": [
+        "perf-fsnap-010",
+        "perf-fund-02",
+        445000,
+        "Monthly transfer",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-39 days','-5 minutes'))",
+      "params": [
+        "perf-fsnap-011",
+        "perf-fund-02",
+        490000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-4 days','-5 minutes'))",
+      "params": [
+        "perf-fsnap-012",
+        "perf-fund-02",
+        535000,
+        "Monthly transfer",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__funds (id, name, target_cents, created_at) VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-184 days','+2 minutes'))",
+      "params": [
+        "perf-fund-03",
+        "Holiday gifts",
+        150000
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-180 days','-10 minutes'))",
+      "params": [
+        "perf-fsnap-013",
+        "perf-fund-03",
+        20000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-145 days','-10 minutes'))",
+      "params": [
+        "perf-fsnap-014",
+        "perf-fund-03",
+        38000,
+        "Monthly transfer",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-110 days','-10 minutes'))",
+      "params": [
+        "perf-fsnap-015",
+        "perf-fund-03",
+        56000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-75 days','-10 minutes'))",
+      "params": [
+        "perf-fsnap-016",
+        "perf-fund-03",
+        74000,
+        "Monthly transfer",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-40 days','-10 minutes'))",
+      "params": [
+        "perf-fsnap-017",
+        "perf-fund-03",
+        92000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-5 days','-10 minutes'))",
+      "params": [
+        "perf-fsnap-018",
+        "perf-fund-03",
+        110000,
+        "Monthly transfer",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__funds (id, name, target_cents, created_at) VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-184 days','+3 minutes'))",
+      "params": [
+        "perf-fund-04",
+        "New roof",
+        2500000
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-181 days','-15 minutes'))",
+      "params": [
+        "perf-fsnap-019",
+        "perf-fund-04",
+        400000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-146 days','-15 minutes'))",
+      "params": [
+        "perf-fsnap-020",
+        "perf-fund-04",
+        490000,
+        "Monthly transfer",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-111 days','-15 minutes'))",
+      "params": [
+        "perf-fsnap-021",
+        "perf-fund-04",
+        580000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-76 days','-15 minutes'))",
+      "params": [
+        "perf-fsnap-022",
+        "perf-fund-04",
+        670000,
+        "Monthly transfer",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-41 days','-15 minutes'))",
+      "params": [
+        "perf-fsnap-023",
+        "perf-fund-04",
+        760000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-6 days','-15 minutes'))",
+      "params": [
+        "perf-fsnap-024",
+        "perf-fund-04",
+        850000,
+        "Monthly transfer",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__funds (id, name, created_at) VALUES (?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-184 days','+4 minutes'))",
+      "params": [
+        "perf-fund-05",
+        "Rainy day"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-182 days','-20 minutes'))",
+      "params": [
+        "perf-fsnap-025",
+        "perf-fund-05",
+        150000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-147 days','-20 minutes'))",
+      "params": [
+        "perf-fsnap-026",
+        "perf-fund-05",
+        160000,
+        "Monthly transfer",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-112 days','-20 minutes'))",
+      "params": [
+        "perf-fsnap-027",
+        "perf-fund-05",
+        170000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-77 days','-20 minutes'))",
+      "params": [
+        "perf-fsnap-028",
+        "perf-fund-05",
+        180000,
+        "Monthly transfer",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-42 days','-20 minutes'))",
+      "params": [
+        "perf-fsnap-029",
+        "perf-fund-05",
+        190000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-7 days','-20 minutes'))",
+      "params": [
+        "perf-fsnap-030",
+        "perf-fund-05",
+        200000,
+        "Monthly transfer",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__funds (id, name, target_cents, created_at) VALUES (?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-184 days','+5 minutes'))",
+      "params": [
+        "perf-fund-06",
+        "Car replacement",
+        1800000
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-183 days','-25 minutes'))",
+      "params": [
+        "perf-fsnap-031",
+        "perf-fund-06",
+        250000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-148 days','-25 minutes'))",
+      "params": [
+        "perf-fsnap-032",
+        "perf-fund-06",
+        300000,
+        "Monthly transfer",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-113 days','-25 minutes'))",
+      "params": [
+        "perf-fsnap-033",
+        "perf-fund-06",
+        350000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-78 days','-25 minutes'))",
+      "params": [
+        "perf-fsnap-034",
+        "perf-fund-06",
+        400000,
+        "Monthly transfer",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-43 days','-25 minutes'))",
+      "params": [
+        "perf-fsnap-035",
+        "perf-fund-06",
+        450000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-8 days','-25 minutes'))",
+      "params": [
+        "perf-fsnap-036",
+        "perf-fund-06",
+        500000,
+        "Monthly transfer",
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-170 days','+0 minutes'))",
+      "params": [
+        "perf-goal-01",
+        "{{me}}",
+        "Kitchen remodel",
+        2500000,
+        "{{date:200}}",
+        "adults"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-165 days','-0 minutes'))",
+      "params": [
+        "perf-gsnap-001",
+        "perf-goal-01",
+        300000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-140 days','-0 minutes'))",
+      "params": [
+        "perf-gsnap-002",
+        "perf-goal-01",
+        510000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-115 days','-0 minutes'))",
+      "params": [
+        "perf-gsnap-003",
+        "perf-goal-01",
+        720000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-90 days','-0 minutes'))",
+      "params": [
+        "perf-gsnap-004",
+        "perf-goal-01",
+        930000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-65 days','-0 minutes'))",
+      "params": [
+        "perf-gsnap-005",
+        "perf-goal-01",
+        1140000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-40 days','-0 minutes'))",
+      "params": [
+        "perf-gsnap-006",
+        "perf-goal-01",
+        1350000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-170 days','+1 minutes'))",
+      "params": [
+        "perf-goal-02",
+        "{{me}}",
+        "Sabbatical cushion",
+        1200000,
+        "{{date:400}}",
+        "adults"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-166 days','-3 minutes'))",
+      "params": [
+        "perf-gsnap-007",
+        "perf-goal-02",
+        100000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-141 days','-3 minutes'))",
+      "params": [
+        "perf-gsnap-008",
+        "perf-goal-02",
+        190000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-116 days','-3 minutes'))",
+      "params": [
+        "perf-gsnap-009",
+        "perf-goal-02",
+        280000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-91 days','-3 minutes'))",
+      "params": [
+        "perf-gsnap-010",
+        "perf-goal-02",
+        370000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-66 days','-3 minutes'))",
+      "params": [
+        "perf-gsnap-011",
+        "perf-goal-02",
+        460000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-41 days','-3 minutes'))",
+      "params": [
+        "perf-gsnap-012",
+        "perf-goal-02",
+        550000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-170 days','+2 minutes'))",
+      "params": [
+        "perf-goal-03",
+        "{{partner}}",
+        "New laptop",
+        220000,
+        "{{date:45}}",
+        "adults"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-167 days','-6 minutes'))",
+      "params": [
+        "perf-gsnap-013",
+        "perf-goal-03",
+        60000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-137 days','-6 minutes'))",
+      "params": [
+        "perf-gsnap-014",
+        "perf-goal-03",
+        90000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-107 days','-6 minutes'))",
+      "params": [
+        "perf-gsnap-015",
+        "perf-goal-03",
+        120000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-77 days','-6 minutes'))",
+      "params": [
+        "perf-gsnap-016",
+        "perf-goal-03",
+        150000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-47 days','-6 minutes'))",
+      "params": [
+        "perf-gsnap-017",
+        "perf-goal-03",
+        180000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-170 days','+3 minutes'))",
+      "params": [
+        "perf-goal-04",
+        "{{partner}}",
+        "Anniversary trip",
+        400000,
+        "{{date:120}}",
+        "everyone"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-168 days','-9 minutes'))",
+      "params": [
+        "perf-gsnap-018",
+        "perf-goal-04",
+        50000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-143 days','-9 minutes'))",
+      "params": [
+        "perf-gsnap-019",
+        "perf-goal-04",
+        90000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-118 days','-9 minutes'))",
+      "params": [
+        "perf-gsnap-020",
+        "perf-goal-04",
+        130000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-93 days','-9 minutes'))",
+      "params": [
+        "perf-gsnap-021",
+        "perf-goal-04",
+        170000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-68 days','-9 minutes'))",
+      "params": [
+        "perf-gsnap-022",
+        "perf-goal-04",
+        210000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-43 days','-9 minutes'))",
+      "params": [
+        "perf-gsnap-023",
+        "perf-goal-04",
+        250000,
+        "{{partner}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-170 days','+4 minutes'))",
+      "params": [
+        "perf-goal-05",
+        "{{child}}",
+        "New bike",
+        50000,
+        "{{date:60}}",
+        "everyone"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-169 days','-12 minutes'))",
+      "params": [
+        "perf-gsnap-024",
+        "perf-goal-05",
+        8000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-144 days','-12 minutes'))",
+      "params": [
+        "perf-gsnap-025",
+        "perf-goal-05",
+        14000,
+        "Allowance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-119 days','-12 minutes'))",
+      "params": [
+        "perf-gsnap-026",
+        "perf-goal-05",
+        20000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-94 days','-12 minutes'))",
+      "params": [
+        "perf-gsnap-027",
+        "perf-goal-05",
+        26000,
+        "Allowance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-69 days','-12 minutes'))",
+      "params": [
+        "perf-gsnap-028",
+        "perf-goal-05",
+        32000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-44 days','-12 minutes'))",
+      "params": [
+        "perf-gsnap-029",
+        "perf-goal-05",
+        38000,
+        "Allowance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, visibility, achieved_at, created_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-20 days'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-170 days','+5 minutes'))",
+      "params": [
+        "perf-goal-06",
+        "{{child}}",
+        "Lego set",
+        12000,
+        "everyone"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-170 days','-15 minutes'))",
+      "params": [
+        "perf-gsnap-030",
+        "perf-goal-06",
+        2000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-140 days','-15 minutes'))",
+      "params": [
+        "perf-gsnap-031",
+        "perf-goal-06",
+        4500,
+        "Allowance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-110 days','-15 minutes'))",
+      "params": [
+        "perf-gsnap-032",
+        "perf-goal-06",
+        7000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-80 days','-15 minutes'))",
+      "params": [
+        "perf-gsnap-033",
+        "perf-goal-06",
+        9500,
+        "Allowance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-50 days','-15 minutes'))",
+      "params": [
+        "perf-gsnap-034",
+        "perf-goal-06",
+        12000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-170 days','+6 minutes'))",
+      "params": [
+        "perf-goal-07",
+        "{{child2}}",
+        "Stuffed dragon",
+        3500,
+        "{{date:30}}",
+        "everyone"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-171 days','-18 minutes'))",
+      "params": [
+        "perf-gsnap-035",
+        "perf-goal-07",
+        500,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-146 days','-18 minutes'))",
+      "params": [
+        "perf-gsnap-036",
+        "perf-goal-07",
+        950,
+        "Allowance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-121 days','-18 minutes'))",
+      "params": [
+        "perf-gsnap-037",
+        "perf-goal-07",
+        1400,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-96 days','-18 minutes'))",
+      "params": [
+        "perf-gsnap-038",
+        "perf-goal-07",
+        1850,
+        "Allowance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-71 days','-18 minutes'))",
+      "params": [
+        "perf-gsnap-039",
+        "perf-goal-07",
+        2300,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-46 days','-18 minutes'))",
+      "params": [
+        "perf-gsnap-040",
+        "perf-goal-07",
+        2750,
+        "Allowance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-170 days','+7 minutes'))",
+      "params": [
+        "perf-goal-08",
+        "{{adult2}}",
+        "Camera lens",
+        90000,
+        "{{date:90}}",
+        "adults"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-172 days','-21 minutes'))",
+      "params": [
+        "perf-gsnap-041",
+        "perf-goal-08",
+        15000,
+        "{{adult2}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-142 days','-21 minutes'))",
+      "params": [
+        "perf-gsnap-042",
+        "perf-goal-08",
+        27000,
+        "{{adult2}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-112 days','-21 minutes'))",
+      "params": [
+        "perf-gsnap-043",
+        "perf-goal-08",
+        39000,
+        "{{adult2}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-82 days','-21 minutes'))",
+      "params": [
+        "perf-gsnap-044",
+        "perf-goal-08",
+        51000,
+        "{{adult2}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-52 days','-21 minutes'))",
+      "params": [
+        "perf-gsnap-045",
+        "perf-goal-08",
+        63000,
+        "{{adult2}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, visibility, achieved_at, created_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-40 days'), strftime('%Y-%m-%dT%H:%M:%fZ','now','-170 days','+8 minutes'))",
+      "params": [
+        "perf-goal-09",
+        "{{child2}}",
+        "Roller skates",
+        6000,
+        "everyone"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-173 days','-24 minutes'))",
+      "params": [
+        "perf-gsnap-046",
+        "perf-goal-09",
+        1000,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-143 days','-24 minutes'))",
+      "params": [
+        "perf-gsnap-047",
+        "perf-goal-09",
+        2250,
+        "Allowance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-113 days','-24 minutes'))",
+      "params": [
+        "perf-gsnap-048",
+        "perf-goal-09",
+        3500,
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-83 days','-24 minutes'))",
+      "params": [
+        "perf-gsnap-049",
+        "perf-goal-09",
+        4750,
+        "Allowance",
+        "{{me}}"
+      ]
+    },
+    {
+      "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, recorded_by, recorded_at) VALUES (?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ','now','-53 days','-24 minutes'))",
+      "params": [
+        "perf-gsnap-050",
+        "perf-goal-09",
+        6000,
+        "{{me}}"
+      ]
+    }
+  ]
+}
