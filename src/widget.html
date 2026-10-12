@@ -27,6 +27,7 @@
     .progress-fill { height: 100%; background: var(--hub-primary, #111827); border-radius: 3px; }
     .progress-fill.complete { background: #16a34a; }
     .progress-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--hub-text-muted, #6b7280); margin-top: 2px; }
+    .load-error { margin: 8px; padding: 8px 10px; border-radius: 10px; background: var(--hub-tint-danger, #fee2e2); color: var(--hub-tint-danger-fg, #b91c1c); font-size: 0.8rem; }
   </style>
 </head>
 <body>
@@ -36,7 +37,6 @@
   import { isAdult, fmtMoney, fmtMoneyShort, esc } from "/hub-sdk.js";
   import { calcNetWorth, calcTrend, latestOf, buildNetWorthHistory } from "./logic.js";
 
-  const CONTEXT = window.__CONTEXT_URL ?? "";
   const DB      = window.__DB_URL      ?? "";
   const ME      = window.__CURRENT_MEMBER ?? null;
 
@@ -109,7 +109,7 @@
     }
   })().catch(() => {
     // A failed read must not draw as a zero balance or "no goals".
-    document.getElementById("root").innerHTML = `<div class="label">Nest Egg</div><div style="font-size:.82rem;color:var(--hub-text-muted,#6b7280);margin-top:4px">Couldn’t load. Try again.</div>`;
+    document.getElementById("root").innerHTML = `<div class="label">Nest Egg</div><div class="load-error" data-testid="load-error" role="alert">Couldn’t load the balances.</div>`;
   });
   </script>
 </body>

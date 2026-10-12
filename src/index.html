@@ -357,6 +357,45 @@ function openModal(html) {
 function closeModal() { modalEl?.remove(); modalEl = null; }
 window.closeModal = closeModal;
 
+// A form's save: the dialog stays open until the hub has answered. saveBegin
+// answers the dialog being saved (null while a save is already on its way);
+// saveRefused says so in that dialog, which is still open as typed, and gives
+// the button back to press again.
+function saveBegin(busyLabel) {
+  const form = modalEl, btn = form?.querySelector(".btn-primary");
+  if (!btn || btn.disabled) return null;
+  form.querySelector(".app-error")?.remove();
+  btn.dataset.label = btn.textContent;
+  btn.disabled = true; btn.textContent = busyLabel;
+  return form;
+}
+function saveRefused(form) {
+  const msg = "Couldn’t save — try again.";
+  if (modalEl !== form) { errorMsg = msg; render(); return; }
+  const btn = form.querySelector(".btn-primary");
+  btn.disabled = false; btn.textContent = btn.dataset.label;
+  const line = document.createElement("div");
+  line.className = "app-error";
+  line.setAttribute("role", "alert");
+  line.style.margin = "14px 0 0";
+  line.textContent = msg;
+  form.querySelector(".modal-actions").before(line);
+}
+// An Add is two writes: the row, then its opening balance. When only the
+// second is refused the dialog stays open, and pressing Add again must not
+// make the row twice — so the dialog remembers the row it already made.
+async function insertOnce(form, insert) {
+  const id = (form.dataset.rowId ??= crypto.randomUUID());
+  if (!form.dataset.rowSaved) { await insert(id); form.dataset.rowSaved = "1"; }
+  return id;
+}
+// What follows a save that landed: a failed re-read is not a failed save, so
+// it is reported under the header, as before, and the dialog closes.
+async function afterSave() {
+  try { await loadAll(); closeModal(); render(); }
+  catch (e) { showError(e); }
+}
+
 // ── Account actions ───────────────────────────────────────────────────────────
 function assetCategoryOptions(selected) {
   return ["home","investment","savings","checking","vehicle","other_asset"]
@@ -413,19 +452,20 @@ window.submitAddAccount = async function() {
   const rawVal   = parseFloat(document.getElementById("f-value")?.value ?? "0") || 0;
   const cents    = Math.round(rawVal * 100);
 
-  const btn = modalEl?.querySelector(".btn-primary");
-  if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
+  const form = saveBegin("Adding…");
+  if (!form) return;
   try {
-    const id = crypto.randomUUID(), now = new Date().toISOString();
-    await db(`INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, ?)`, [id, name, category, type, now]);
+    const now = new Date().toISOString();
+    const id = await insertOnce(form, (id) =>
+      db(`INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, ?)`, [id, name, category, type, now]));
     if (cents > 0) {
       await db(`INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
         [crypto.randomUUID(), id, cents, ME?.id ?? "system", now]);
     }
-    await loadAll(); closeModal(); render();
-  } catch (e) {
-    showError(e);
+  } catch {
+    return saveRefused(form);
   }
+  await afterSave();
 };
 
 function openUpdateAccountModal(acctId) {
@@ -462,18 +502,17 @@ window.submitUpdateAccount = async function(acctId) {
   const now    = new Date().toISOString();
   const cents  = Math.round(rawVal * 100);
 
-  const optimisticSnap = { id: snapId, account_id: acctId, value_cents: cents, note, recorded_by: ME?.id ?? "system", recorded_at: now };
-  acctSnapshots.push(optimisticSnap);
-  closeModal(); render();
-
+  const form = saveBegin("Updating…");
+  if (!form) return;
   try {
     await db(`INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
       [snapId, acctId, cents, note, ME?.id ?? "system", now]);
-  } catch (e) {
-    const idx = acctSnapshots.indexOf(optimisticSnap);
-    if (idx !== -1) acctSnapshots.splice(idx, 1);
-    showError(e);
+  } catch {
+    return saveRefused(form);
   }
+  acctSnapshots.push({ id: snapId, account_id: acctId, value_cents: cents, note, recorded_by: ME?.id ?? "system", recorded_at: now });
+  if (modalEl === form) closeModal();
+  render();
 };
 
 window.archiveAccount = async function(acctId) {
@@ -482,8 +521,8 @@ window.archiveAccount = async function(acctId) {
   closeModal();
   try {
     await db(`UPDATE app_nest_egg__accounts SET archived_at = ? WHERE id = ?`, [new Date().toISOString(), acctId]);
-    await loadAll(); render();
-  } catch (e) { showError(e); }
+  } catch (e) { console.error(e); return showError(new Error("Couldn’t remove the account — try again.")); }
+  await afterSave();
 };
 
 // ── Fund actions ──────────────────────────────────────────────────────────────
@@ -520,19 +559,20 @@ window.submitAddFund = async function() {
   const rawTarget = parseFloat(document.getElementById("f-target")?.value  ?? "");
   const balCents  = Math.round(rawBal * 100);
   const targetCents = isNaN(rawTarget) || rawTarget <= 0 ? null : Math.round(rawTarget * 100);
-  const btn = modalEl?.querySelector(".btn-primary");
-  if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
+  const form = saveBegin("Adding…");
+  if (!form) return;
   try {
-    const id = crypto.randomUUID(), now = new Date().toISOString();
-    await db(`INSERT INTO app_nest_egg__funds (id, name, target_cents, created_at) VALUES (?, ?, ?, ?)`, [id, name, targetCents, now]);
+    const now = new Date().toISOString();
+    const id = await insertOnce(form, (id) =>
+      db(`INSERT INTO app_nest_egg__funds (id, name, target_cents, created_at) VALUES (?, ?, ?, ?)`, [id, name, targetCents, now]));
     if (balCents > 0) {
       await db(`INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
         [crypto.randomUUID(), id, balCents, ME?.id ?? "system", now]);
     }
-    await loadAll(); closeModal(); render();
-  } catch (e) {
-    showError(e);
+  } catch {
+    return saveRefused(form);
   }
+  await afterSave();
 };
 
 function openUpdateFundModal(fundId) {
@@ -577,26 +617,22 @@ window.submitUpdateFund = async function(fundId) {
   const snapId      = crypto.randomUUID();
   const now         = new Date().toISOString();
 
-  const fund = funds.find(f => f.id === fundId);
-  const origTargetCents = fund?.target_cents;
-  const optimisticSnap  = { id: snapId, fund_id: fundId, balance_cents: balCents, note, recorded_by: ME?.id ?? "system", recorded_at: now };
-
-  if (fund) fund.target_cents = targetCents;
-  fundSnapshots.push(optimisticSnap);
-  closeModal(); render();
-
+  const form = saveBegin("Updating…");
+  if (!form) return;
   try {
-    await Promise.all([
-      db(`UPDATE app_nest_egg__funds SET target_cents = ? WHERE id = ?`, [targetCents, fundId]),
-      db(`INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
-        [snapId, fundId, balCents, note, ME?.id ?? "system", now]),
-    ]);
-  } catch (e) {
-    if (fund) fund.target_cents = origTargetCents;
-    const idx = fundSnapshots.indexOf(optimisticSnap);
-    if (idx !== -1) fundSnapshots.splice(idx, 1);
-    showError(e);
+    // One after the other, the repeatable write first: if either is refused,
+    // pressing Update again cannot record the balance twice.
+    await db(`UPDATE app_nest_egg__funds SET target_cents = ? WHERE id = ?`, [targetCents, fundId]);
+    await db(`INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
+      [snapId, fundId, balCents, note, ME?.id ?? "system", now]);
+  } catch {
+    return saveRefused(form);
   }
+  const fund = funds.find(f => f.id === fundId);
+  if (fund) fund.target_cents = targetCents;
+  fundSnapshots.push({ id: snapId, fund_id: fundId, balance_cents: balCents, note, recorded_by: ME?.id ?? "system", recorded_at: now });
+  if (modalEl === form) closeModal();
+  render();
 };
 
 window.archiveFund = async function(fundId) {
@@ -605,8 +641,8 @@ window.archiveFund = async function(fundId) {
   closeModal();
   try {
     await db(`UPDATE app_nest_egg__funds SET archived_at = ? WHERE id = ?`, [new Date().toISOString(), fundId]);
-    await loadAll(); render();
-  } catch (e) { showError(e); }
+  } catch (e) { console.error(e); return showError(new Error("Couldn’t remove the fund — try again.")); }
+  await afterSave();
 };
 
 // ── Goal actions ──────────────────────────────────────────────────────────────
@@ -669,20 +705,21 @@ window.submitAddGoal = async function() {
   const rawBal      = parseFloat(document.getElementById("f-balance")?.value ?? "0") || 0;
   const balCents    = Math.round(rawBal * 100);
   const targetCents = Math.round(rawTarget * 100);
-  const btn = modalEl?.querySelector(".btn-primary");
-  if (btn) { btn.disabled = true; btn.textContent = "Adding…"; }
+  const form = saveBegin("Adding…");
+  if (!form) return;
   try {
-    const id = crypto.randomUUID(), now = new Date().toISOString();
-    await db(`INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id, memberId, name, targetCents, targetDate, visibility, now]);
+    const now = new Date().toISOString();
+    const id = await insertOnce(form, (id) =>
+      db(`INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [id, memberId, name, targetCents, targetDate, visibility, now]));
     if (balCents > 0) {
       await db(`INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
         [crypto.randomUUID(), id, balCents, ME?.id ?? "system", now]);
     }
-    await loadAll(); closeModal(); render();
-  } catch (e) {
-    showError(e);
+  } catch {
+    return saveRefused(form);
   }
+  await afterSave();
 };
 
 function openUpdateGoalModal(goalId) {
@@ -739,30 +776,32 @@ window.submitUpdateGoal = async function(goalId) {
 
   const targetCents = goal.target_cents ?? 0;
   const achieved = balCents >= targetCents ? now : null;
-  const origGoal = { visibility: goal.visibility, target_date: goal.target_date, achieved_at: goal.achieved_at };
-  const optimisticSnap = { id: snapId, goal_id: goalId, balance_cents: balCents, note, recorded_by: ME?.id ?? "system", recorded_at: now };
   const wasAchieved = goal.achieved_at;
 
-  Object.assign(goal, { visibility: vis, target_date: date, achieved_at: achieved });
-  goalSnapshots.push(optimisticSnap);
-  closeModal(); render();
-
+  const form = saveBegin("Updating…");
+  if (!form) return;
+  let changed;
   try {
     // The goal is written first. The hub narrows this UPDATE to goals the
     // member may write and answers 200 with nothing changed for any other, so
     // a balance is recorded and the goal announced as reached only once the
     // goal itself took the change.
-    const { changed } = await db(`UPDATE app_nest_egg__savings_goals SET visibility = ?, target_date = ?, achieved_at = ? WHERE id = ?`, [vis, date, achieved, goalId]);
-    if (changed === 0) throw new Error("This goal could not be updated.");
-    await db(`INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
-      [snapId, goalId, balCents, note, ME?.id ?? "system", now]);
-    if (achieved && !wasAchieved) await publishGoalReached({ ...goal, latestCents: balCents });
-  } catch (e) {
-    Object.assign(goal, origGoal);
-    const idx = goalSnapshots.indexOf(optimisticSnap);
-    if (idx !== -1) goalSnapshots.splice(idx, 1);
-    showError(e);
+    ({ changed } = await db(`UPDATE app_nest_egg__savings_goals SET visibility = ?, target_date = ?, achieved_at = ? WHERE id = ?`, [vis, date, achieved, goalId]));
+    if (changed !== 0) {
+      await db(`INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
+        [snapId, goalId, balCents, note, ME?.id ?? "system", now]);
+    }
+  } catch {
+    return saveRefused(form);
   }
+  // Not this member's goal to change: trying again cannot help, so the dialog
+  // closes and the reason is shown under the header.
+  if (changed === 0) return showError(new Error("This goal could not be updated."));
+  Object.assign(goal, { visibility: vis, target_date: date, achieved_at: achieved });
+  goalSnapshots.push({ id: snapId, goal_id: goalId, balance_cents: balCents, note, recorded_by: ME?.id ?? "system", recorded_at: now });
+  if (modalEl === form) closeModal();
+  render();
+  if (achieved && !wasAchieved) publishGoalReached({ ...goal, latestCents: balCents });
 };
 
 window.deleteGoal = async function(goalId) {
@@ -776,11 +815,12 @@ window.deleteGoal = async function(goalId) {
   // were unreachable by anyone once the goal was gone. manifest
   // delete_cascades takes them with the goal, as trusted SQL in the same
   // transactional batch.
+  let changed;
   try {
-    const { changed } = await db(`DELETE FROM app_nest_egg__savings_goals WHERE id = ?`, [goalId]);
-    if (changed === 0) throw new Error("This goal could not be deleted.");
-    await loadAll(); render();
-  } catch (e) { showError(e); }
+    ({ changed } = await db(`DELETE FROM app_nest_egg__savings_goals WHERE id = ?`, [goalId]));
+  } catch (e) { console.error(e); return showError(new Error("Couldn’t delete the goal — try again.")); }
+  if (changed === 0) return showError(new Error("This goal could not be deleted."));
+  await afterSave();
 };
 
 // ── Render helpers ────────────────────────────────────────────────────────────
