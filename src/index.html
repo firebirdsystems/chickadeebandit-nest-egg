@@ -139,8 +139,11 @@
 
     /* ── Misc ──────────────────────────────────────────── */
     .empty { text-align: center; padding: 36px 16px; color: var(--muted); font-size: 0.9rem; }
+    .load-error { margin: 0 0 12px; padding: 10px 14px; border-radius: 10px; background: var(--hub-tint-danger, #fee2e2); color: var(--hub-tint-danger-fg, #b91c1c); font-size: 0.9rem; display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+    .load-error-retry { background: none; border: 1px solid currentColor; border-radius: 8px; padding: 5px 10px; font: inherit; font-weight: 600; color: inherit; cursor: pointer; flex-shrink: 0; }
     .loading { text-align: center; padding: 40px; color: var(--muted); }
     .add-row { padding: 10px 0 4px; }
+    .app-error { background: var(--red-light); color: var(--red); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.875rem; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -156,6 +159,7 @@ import {
   latestOf, buildNetWorthHistory,
   categoryGlyph, categoryLabel,
   sortFunds,
+  assignsGoalOwner, goalOwnerChoices, canEditGoal,
 } from "./logic.js";
 
 const CONTEXT    = window.__CONTEXT_URL    ?? "";
@@ -163,6 +167,10 @@ const DB         = window.__DB_URL         ?? "";
 const EVENTS_URL = window.__EVENTS_URL     ?? "/api/events";
 const APP_ID     = window.__APP_ID         ?? "nest-egg";
 const ME         = window.__CURRENT_MEMBER ?? null;
+// Where the app is running: the hub lets every adult at home write other
+// members' goals, and only the steward in a shared space.
+const TENANT     = { tenantKind: window.__TENANT_KIND ?? "household", spaceKind: window.__SPACE_KIND ?? null, isAdmin: window.__IS_ADMIN === true };
+const ASSIGNS_OWNER = assignsGoalOwner(ME, TENANT);
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let members       = [];
@@ -173,12 +181,26 @@ let fundSnapshots = [];
 let goals         = [];
 let goalSnapshots = [];
 let activeTab     = "networth";
+let errorMsg      = "";   // the last refusal or failure, shown under the header
+let loadFailed    = false; // the first load failed: the figures are unknown, not zero
 
 // ── DB helper ─────────────────────────────────────────────────────────────────
 async function db(sql, params = []) {
   if (!DB) return { rows: [] };
   const res = await fetch(DB, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sql, params }) });
-  return res.json();
+  const json = await res.json().catch(() => null);
+  // A refusal is an answer too: read as a success, a write the hub turned
+  // down would look as though it had been saved.
+  if (!res.ok || !json || typeof json !== "object" || json.error) throw new Error(json?.error || "That could not be saved");
+  return json;
+}
+
+// A failure closes whatever dialog raised it and is shown under the header,
+// so it is still on screen once the dialog is gone.
+function showError(e) {
+  errorMsg = e?.message || "Something went wrong. Please try again.";
+  closeModal();
+  render();
 }
 
 // ── Load ──────────────────────────────────────────────────────────────────────
@@ -191,10 +213,13 @@ async function loadMembers() {
     ];
     return;
   }
-  try {
-    const res = await fetch(`${CONTEXT}?keys=family.members`);
-    members = ((await res.json())["family.members"]) ?? [];
-  } catch { members = []; }
+  // A failed read throws: firstLoad shows the load banner, not goals with nobody's name on them.
+  const res = await fetch(`${CONTEXT}?keys=family.members`);
+  const data = await res.json().catch(() => null);
+  if (!res.ok || !data || typeof data !== "object" || data.error) throw new Error("Couldn’t reach the hub. Try again.");
+  // The hub answers 200 and names a key it could not resolve in $errors: that read failed too.
+  if (Array.isArray(data.$errors) && data.$errors.includes("family.members")) throw new Error("Couldn’t reach the hub. Try again.");
+  members = data["family.members"] ?? [];
 }
 
 async function loadAll() {
@@ -319,6 +344,7 @@ async function publishGoalReached(goal) {
 let modalEl = null;
 function openModal(html) {
   closeModal();
+  errorMsg = "";
   modalEl = document.createElement("div");
   modalEl.className = "modal-backdrop";
   modalEl.innerHTML = `<div class="modal">${html}</div>`;
@@ -398,8 +424,7 @@ window.submitAddAccount = async function() {
     }
     await loadAll(); closeModal(); render();
   } catch (e) {
-    if (btn) { btn.disabled = false; btn.textContent = "Add"; }
-    throw e;
+    showError(e);
   }
 };
 
@@ -444,10 +469,10 @@ window.submitUpdateAccount = async function(acctId) {
   try {
     await db(`INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
       [snapId, acctId, cents, note, ME?.id ?? "system", now]);
-  } catch {
+  } catch (e) {
     const idx = acctSnapshots.indexOf(optimisticSnap);
     if (idx !== -1) acctSnapshots.splice(idx, 1);
-    render();
+    showError(e);
   }
 };
 
@@ -455,8 +480,10 @@ window.archiveAccount = async function(acctId) {
   if (!isAdult(ME)) return;
   if (!await hubConfirm({ message: "Remove this account?", description: "Historical snapshots are kept. You can re-add it later.", confirmLabel: "Remove", destructive: true })) return;
   closeModal();
-  await db(`UPDATE app_nest_egg__accounts SET archived_at = ? WHERE id = ?`, [new Date().toISOString(), acctId]);
-  await loadAll(); render();
+  try {
+    await db(`UPDATE app_nest_egg__accounts SET archived_at = ? WHERE id = ?`, [new Date().toISOString(), acctId]);
+    await loadAll(); render();
+  } catch (e) { showError(e); }
 };
 
 // ── Fund actions ──────────────────────────────────────────────────────────────
@@ -504,8 +531,7 @@ window.submitAddFund = async function() {
     }
     await loadAll(); closeModal(); render();
   } catch (e) {
-    if (btn) { btn.disabled = false; btn.textContent = "Add"; }
-    throw e;
+    showError(e);
   }
 };
 
@@ -565,11 +591,11 @@ window.submitUpdateFund = async function(fundId) {
       db(`INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
         [snapId, fundId, balCents, note, ME?.id ?? "system", now]),
     ]);
-  } catch {
+  } catch (e) {
     if (fund) fund.target_cents = origTargetCents;
     const idx = fundSnapshots.indexOf(optimisticSnap);
     if (idx !== -1) fundSnapshots.splice(idx, 1);
-    render();
+    showError(e);
   }
 };
 
@@ -577,13 +603,17 @@ window.archiveFund = async function(fundId) {
   if (!isAdult(ME)) return;
   if (!await hubConfirm({ message: "Remove this fund?", description: "History is kept.", confirmLabel: "Remove", destructive: true })) return;
   closeModal();
-  await db(`UPDATE app_nest_egg__funds SET archived_at = ? WHERE id = ?`, [new Date().toISOString(), fundId]);
-  await loadAll(); render();
+  try {
+    await db(`UPDATE app_nest_egg__funds SET archived_at = ? WHERE id = ?`, [new Date().toISOString(), fundId]);
+    await loadAll(); render();
+  } catch (e) { showError(e); }
 };
 
 // ── Goal actions ──────────────────────────────────────────────────────────────
 function openAddGoalModal() {
-  const memberOptions = members.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join("");
+  // A goal created by someone who may not assign an owner is recorded as their
+  // own, so they are offered only themself.
+  const memberOptions = goalOwnerChoices(members, ME, TENANT).map(m => `<option value="${esc(m.id)}">${esc(m.name)}</option>`).join("");
   openModal(`
     <h3>Add Savings Goal</h3>
     <div class="form-row">
@@ -633,7 +663,7 @@ window.submitAddGoal = async function() {
   if (!name) { document.getElementById("f-name")?.focus(); return; }
   const rawTarget = parseFloat(document.getElementById("f-target")?.value ?? "");
   if (!rawTarget || rawTarget <= 0) { document.getElementById("f-target")?.focus(); return; }
-  const memberId    = document.getElementById("f-member")?.value;
+  const memberId    = ASSIGNS_OWNER ? document.getElementById("f-member")?.value : ME.id;
   const visibility  = document.getElementById("f-vis")?.value ?? "adults";
   const targetDate  = document.getElementById("f-date")?.value || null;
   const rawBal      = parseFloat(document.getElementById("f-balance")?.value ?? "0") || 0;
@@ -651,13 +681,13 @@ window.submitAddGoal = async function() {
     }
     await loadAll(); closeModal(); render();
   } catch (e) {
-    if (btn) { btn.disabled = false; btn.textContent = "Add Goal"; }
-    throw e;
+    showError(e);
   }
 };
 
 function openUpdateGoalModal(goalId) {
   const goal = goals.find(g => g.id === goalId); if (!goal) return;
+  if (!canEditGoal(goal, ME, TENANT)) return;
   const wg = goalWithLatest(goal);
   const member = members.find(m => m.id === goal.member_id);
   openModal(`
@@ -696,7 +726,8 @@ function openUpdateGoalModal(goalId) {
 }
 
 window.submitUpdateGoal = async function(goalId) {
-  if (!isAdult(ME)) return;
+  const goal = goals.find(g => g.id === goalId);
+  if (!goal || !canEditGoal(goal, ME, TENANT)) return;
   const rawBal = parseFloat(document.getElementById("f-balance")?.value ?? "");
   if (isNaN(rawBal) || rawBal < 0) { document.getElementById("f-balance")?.focus(); return; }
   const vis      = document.getElementById("f-vis")?.value ?? "adults";
@@ -706,34 +737,37 @@ window.submitUpdateGoal = async function(goalId) {
   const snapId   = crypto.randomUUID();
   const now      = new Date().toISOString();
 
-  const goal = goals.find(g => g.id === goalId);
-  const targetCents = goal?.target_cents ?? 0;
+  const targetCents = goal.target_cents ?? 0;
   const achieved = balCents >= targetCents ? now : null;
-  const origGoal = goal ? { visibility: goal.visibility, target_date: goal.target_date, achieved_at: goal.achieved_at } : null;
+  const origGoal = { visibility: goal.visibility, target_date: goal.target_date, achieved_at: goal.achieved_at };
   const optimisticSnap = { id: snapId, goal_id: goalId, balance_cents: balCents, note, recorded_by: ME?.id ?? "system", recorded_at: now };
-  const wasAchieved = goal?.achieved_at;
+  const wasAchieved = goal.achieved_at;
 
-  if (goal) Object.assign(goal, { visibility: vis, target_date: date, achieved_at: achieved });
+  Object.assign(goal, { visibility: vis, target_date: date, achieved_at: achieved });
   goalSnapshots.push(optimisticSnap);
   closeModal(); render();
 
   try {
-    await Promise.all([
-      db(`UPDATE app_nest_egg__savings_goals SET visibility = ?, target_date = ?, achieved_at = ? WHERE id = ?`, [vis, date, achieved, goalId]),
-      db(`INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
-        [snapId, goalId, balCents, note, ME?.id ?? "system", now]),
-    ]);
-    if (achieved && !wasAchieved && goal) await publishGoalReached({ ...goal, latestCents: balCents });
-  } catch {
-    if (goal && origGoal) Object.assign(goal, origGoal);
+    // The goal is written first. The hub narrows this UPDATE to goals the
+    // member may write and answers 200 with nothing changed for any other, so
+    // a balance is recorded and the goal announced as reached only once the
+    // goal itself took the change.
+    const { changed } = await db(`UPDATE app_nest_egg__savings_goals SET visibility = ?, target_date = ?, achieved_at = ? WHERE id = ?`, [vis, date, achieved, goalId]);
+    if (changed === 0) throw new Error("This goal could not be updated.");
+    await db(`INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, ?, ?, ?)`,
+      [snapId, goalId, balCents, note, ME?.id ?? "system", now]);
+    if (achieved && !wasAchieved) await publishGoalReached({ ...goal, latestCents: balCents });
+  } catch (e) {
+    Object.assign(goal, origGoal);
     const idx = goalSnapshots.indexOf(optimisticSnap);
     if (idx !== -1) goalSnapshots.splice(idx, 1);
-    render();
+    showError(e);
   }
 };
 
 window.deleteGoal = async function(goalId) {
-  if (!isAdult(ME)) return;
+  const goal = goals.find(g => g.id === goalId);
+  if (!goal || !canEditGoal(goal, ME, TENANT)) return;
   if (!await hubConfirm({ message: "Delete this goal?", description: "All progress history will be removed.", confirmLabel: "Delete", destructive: true })) return;
   closeModal();
   // Snapshots are not deleted here by app SQL and cannot be: the
@@ -742,8 +776,11 @@ window.deleteGoal = async function(goalId) {
   // were unreachable by anyone once the goal was gone. manifest
   // delete_cascades takes them with the goal, as trusted SQL in the same
   // transactional batch.
-  await db(`DELETE FROM app_nest_egg__savings_goals WHERE id = ?`, [goalId]);
-  await loadAll(); render();
+  try {
+    const { changed } = await db(`DELETE FROM app_nest_egg__savings_goals WHERE id = ?`, [goalId]);
+    if (changed === 0) throw new Error("This goal could not be deleted.");
+    await loadAll(); render();
+  } catch (e) { showError(e); }
 };
 
 // ── Render helpers ────────────────────────────────────────────────────────────
@@ -838,7 +875,7 @@ function renderGoalsTab() {
     : goals.filter(g => g.member_id === ME?.id || g.visibility === "everyone");
 
   if (!visibleGoals.length) return `
-    <div class="empty">${meIsAdult ? "No savings goals yet. Create goals for any household member." : "No savings goals to show yet."}</div>
+    <div class="empty">${meIsAdult ? (ASSIGNS_OWNER ? "No savings goals yet. Create goals for any household member." : "No savings goals yet. Add one for yourself.") : "No savings goals to show yet."}</div>
     ${meIsAdult ? `<div class="add-row"><button class="btn btn-ghost btn-sm" onclick="openAddGoalModal()" data-testid="add-goal">+ Add Goal</button></div>` : ""}`;
 
   const memberIds = [...new Set(visibleGoals.map(g => g.member_id))];
@@ -875,7 +912,7 @@ function renderGoalsTab() {
           </div>
           <div class="item-right">
             <div class="item-amount" style="color:var(--accent)">${fmtMoney(wg.latestCents)}</div>
-            ${meIsAdult ? `<div class="item-actions"><button class="btn btn-ghost btn-sm" data-act="update-goal" data-id="${esc(goal.id)}" data-testid="goal-update" data-goal-id="${esc(goal.id)}">Update</button></div>` : ""}
+            ${canEditGoal(goal, ME, TENANT) ? `<div class="item-actions"><button class="btn btn-ghost btn-sm" data-act="update-goal" data-id="${esc(goal.id)}" data-testid="goal-update" data-goal-id="${esc(goal.id)}">Update</button></div>` : ""}
           </div>
         </div>`;
     }
@@ -902,7 +939,8 @@ function render() {
     </div>` : "";
 
   let content = "";
-  if (activeTab === "networth" && meIsAdult) content = renderNetWorthTab();
+  if (loadFailed) content = "";
+  else if (activeTab === "networth" && meIsAdult) content = renderNetWorthTab();
   else if (activeTab === "funds" && meIsAdult) content = renderFundsTab();
   else content = renderGoalsTab();
 
@@ -910,11 +948,13 @@ function render() {
     <header>
       <div><h1>${glyph("egg")} Nest Egg</h1><div class="sub">Household finances</div></div>
     </header>
+    ${loadFailed ? `<div class="load-error" data-testid="load-error" role="alert"><span>Couldn’t load your finances.</span> <button type="button" class="load-error-retry" data-testid="load-retry" onclick="retryLoad()">Try again</button></div>` : ""}
+    ${errorMsg ? `<div class="app-error" role="alert">${esc(errorMsg)}</div>` : ""}
     ${tabsHtml}
     <div id="tab-content">${content}</div>`;
 }
 
-window.setTab = function(tab) { activeTab = tab; render(); };
+window.setTab = function(tab) { activeTab = tab; errorMsg = ""; render(); };
 
 // Delegated handler for buttons carrying a DB-derived id. Row ids are
 // user-controllable (a child can INSERT a savings_goal with an attacker-chosen
@@ -945,11 +985,14 @@ window.openAddGoalModal       = openAddGoalModal;
 window.openUpdateGoalModal    = openUpdateGoalModal;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-(async () => {
-  await loadMembers();
-  await loadAll();
+async function firstLoad() {
+  // A failed load still draws the page, with the failure under the header.
+  try { await loadMembers(); await loadAll(); loadFailed = false; }
+  catch { loadFailed = true; }
   render();
-})();
+}
+window.retryLoad = firstLoad;
+firstLoad();
 </script>
 </body>
 </html>

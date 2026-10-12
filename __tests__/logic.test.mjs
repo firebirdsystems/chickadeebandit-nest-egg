@@ -5,6 +5,7 @@ import {
   fmtMonthYear, fmtDate,
   latestOf, priorOf, calcTrend,
   buildNetWorthHistory, sortFunds,
+  supervisesGoals, assignsGoalOwner, goalOwnerChoices, canEditGoal,
 } from "../src/logic.js";
 
 describe("category helpers", () => {
@@ -153,5 +154,53 @@ describe("sortFunds", () => {
     const before = [...input];
     expect(sortFunds(input).map((f) => f.id)).toEqual(["a", "b"]);
     expect(input).toEqual(before);
+  });
+});
+
+describe("who may write savings goals", () => {
+  const adult = { id: "a1", role: "adult" };
+  const child = { id: "c1", role: "child" };
+  const participant = { tenantKind: "shared_space", spaceKind: "general", isAdmin: false };
+  const steward = { tenantKind: "shared_space", spaceKind: "general", isAdmin: true };
+  const coparent = { tenantKind: "shared_space", spaceKind: "coparenting", isAdmin: true };
+  const members = [adult, child, { id: "a2", role: "adult" }];
+
+  it("supervisesGoals: every adult at home, only the steward in a space", () => {
+    expect(supervisesGoals(adult)).toBe(true);
+    expect(supervisesGoals(child)).toBe(false);
+    expect(supervisesGoals(null)).toBe(false);
+    expect(supervisesGoals(adult, participant)).toBe(false);
+    expect(supervisesGoals(adult, steward)).toBe(true);
+    expect(supervisesGoals(adult, coparent)).toBe(true);
+  });
+
+  it("assignsGoalOwner: as supervision, but nobody in a co-parenting space", () => {
+    expect(assignsGoalOwner(adult)).toBe(true);
+    expect(assignsGoalOwner(child)).toBe(false);
+    expect(assignsGoalOwner(adult, participant)).toBe(false);
+    expect(assignsGoalOwner(adult, steward)).toBe(true);
+    expect(assignsGoalOwner(adult, coparent)).toBe(false);
+    expect(assignsGoalOwner(adult, { tenantKind: "shared_space", spaceKind: "roster", isAdmin: true })).toBe(true);
+  });
+
+  it("goalOwnerChoices offers everyone to an assigner and only themself to anyone else", () => {
+    expect(goalOwnerChoices(members, adult)).toEqual(members);
+    expect(goalOwnerChoices(members, adult, steward)).toEqual(members);
+    expect(goalOwnerChoices(members, adult, participant)).toEqual([adult]);
+    expect(goalOwnerChoices(members, adult, coparent)).toEqual([adult]);
+    expect(goalOwnerChoices(members, null, participant)).toEqual([]);
+  });
+
+  it("canEditGoal: an adult's own goal, or any goal for whoever supervises", () => {
+    const mine = { id: "g1", member_id: "a1" };
+    const theirs = { id: "g2", member_id: "a2" };
+    expect(canEditGoal(mine, adult)).toBe(true);
+    expect(canEditGoal(theirs, adult)).toBe(true);
+    expect(canEditGoal(mine, adult, participant)).toBe(true);
+    expect(canEditGoal(theirs, adult, participant)).toBe(false);
+    expect(canEditGoal(theirs, adult, steward)).toBe(true);
+    expect(canEditGoal(theirs, adult, coparent)).toBe(true);
+    expect(canEditGoal({ id: "g3", member_id: "c1" }, child)).toBe(false);
+    expect(canEditGoal(mine, null)).toBe(false);
   });
 });

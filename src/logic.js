@@ -168,3 +168,47 @@ export function sortFunds(funds) {
     (a.name ?? "").localeCompare(b.name ?? "")
     || (a.created_at ?? "").localeCompare(b.created_at ?? ""));
 }
+
+// The hub's own test for an adult member (hub-sdk `isAdult`), repeated here so
+// the role rules below can be unit-tested without the browser-only SDK.
+function isAdultMember(member) {
+  return !!member && (member.role === "adult" || member.role === "admin");
+}
+
+/**
+ * Whether a member may change or delete a savings goal that belongs to someone
+ * else. Mirrors the hub's rule for the savings_goals table
+ * (owner_or_visibility): any adult in a household, and only the steward in a
+ * shared space. An adult who merely takes part in a space can see such a goal
+ * but a write to it changes nothing.
+ */
+export function supervisesGoals(member, { tenantKind = "household", isAdmin = false } = {}) {
+  return tenantKind === "household" ? isAdultMember(member) : isAdmin === true;
+}
+
+/**
+ * Whether a member may create a goal in another member's name. Mirrors the
+ * hub's supervisor_assigns_owner grant: every adult in a household, the
+ * steward in a shared space, and nobody in a co-parenting space, where one
+ * parent never records a goal as the other's. Anyone else's new goal is
+ * recorded as their own whatever owner they name.
+ */
+export function assignsGoalOwner(member, { tenantKind = "household", spaceKind = null, isAdmin = false } = {}) {
+  if (tenantKind === "household") return isAdultMember(member);
+  return spaceKind !== "coparenting" && isAdmin === true;
+}
+
+/** The members a new goal may be created for: everyone, or only the creator. */
+export function goalOwnerChoices(members, member, tenant) {
+  if (assignsGoalOwner(member, tenant)) return members;
+  return members.filter(m => m.id === member?.id);
+}
+
+/**
+ * Whether a member is offered Update and Delete on a goal. Managing goals is
+ * for adults; within that, a goal is writable by its owner and by whoever
+ * supervises goals.
+ */
+export function canEditGoal(goal, member, tenant) {
+  return isAdultMember(member) && (goal.member_id === member.id || supervisesGoals(member, tenant));
+}

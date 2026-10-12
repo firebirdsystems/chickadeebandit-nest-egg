@@ -43,7 +43,9 @@
   async function db(sql, params = []) {
     if (!DB) return { rows: [] };
     const res = await fetch(DB, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sql, params }) });
-    return res.json();
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json || typeof json !== "object" || json.error) throw new Error(json?.error || "Couldn’t reach the hub. Try again.");
+    return json;
   }
 
   function renderAdult(accounts, snapshots) {
@@ -105,7 +107,10 @@
       ]);
       renderKid(g.rows ?? [], gs_.rows ?? []);
     }
-  })();
+  })().catch(() => {
+    // A failed read must not draw as a zero balance or "no goals".
+    document.getElementById("root").innerHTML = `<div class="label">Nest Egg</div><div style="font-size:.82rem;color:var(--hub-text-muted,#6b7280);margin-top:4px">Couldn’t load. Try again.</div>`;
+  });
   </script>
 </body>
 </html>
