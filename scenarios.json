@@ -269,6 +269,50 @@
       ]
     },
     {
+      "name": "Add Goal is one batch: the goal and its starting balance land together, the goal first",
+      "members": {
+        "parent": "adult",
+        "kid": "child"
+      },
+      "steps": [
+        {
+          "action": "batch",
+          "as": "parent",
+          "statements": [
+            {
+              "sql": "INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+              "params": ["g-batch", "{{kid}}", "Skateboard", 12000, null, "everyone", "2026-01-01T00:00:00Z"]
+            },
+            {
+              "sql": "INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)",
+              "params": ["gs-batch", "g-batch", 2500, "{{parent}}", "2026-01-01T00:00:00Z"]
+            }
+          ],
+          "expect": { "status": 200, "changed": [1, 1] }
+        },
+        {
+          "action": "db",
+          "as": "parent",
+          "sql": "SELECT id, name, target_cents FROM app_nest_egg__savings_goals",
+          "expect": {
+            "status": 200,
+            "rowCount": 1,
+            "rowsContain": [{ "id": "g-batch", "name": "Skateboard", "target_cents": 12000 }]
+          }
+        },
+        {
+          "action": "db",
+          "as": "kid",
+          "sql": "SELECT id, goal_id, balance_cents FROM app_nest_egg__goal_snapshots",
+          "expect": {
+            "status": 200,
+            "rowCount": 1,
+            "rowsContain": [{ "id": "gs-batch", "goal_id": "g-batch", "balance_cents": 2500 }]
+          }
+        }
+      ]
+    },
+    {
       "name": "in a general shared space only the steward creates a goal for another member; a participant adult's goal is stamped as their own",
       "context": "shared_space",
       "members": { "a": "adult", "b": "adult", "steward": "admin" },
