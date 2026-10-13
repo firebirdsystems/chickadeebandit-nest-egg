@@ -195,6 +195,16 @@ async function db(sql, params = []) {
   return json;
 }
 
+// Atomic multi-statement form of the same endpoint: the statements land whole
+// or not at all, so a refused Add leaves nothing behind for the next press.
+async function dbBatch(statements) {
+  if (!DB || !statements.length) return [];
+  const res = await fetch(DB, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ statements }) });
+  const json = await res.json().catch(() => null);
+  if (!res.ok || !json || typeof json !== "object" || json.error) throw new Error(json?.error || "That could not be saved");
+  return json.results ?? [];
+}
+
 // A failure closes whatever dialog raised it and is shown under the header,
 // so it is still on screen once the dialog is gone.
 function showError(e) {
@@ -381,12 +391,16 @@ function saveRefused(form) {
   line.textContent = msg;
   form.querySelector(".modal-actions").before(line);
 }
-// An Add is two writes: the row, then its opening balance. When only the
-// second is refused the dialog stays open, and pressing Add again must not
-// make the row twice — so the dialog remembers the row it already made.
-async function insertOnce(form, insert) {
+// Adding a goal is two writes that cannot share a batch: the hub checks the
+// opening balance against a goal that must already be stored. When the dialog
+// stays open after a refusal, pressing Add again must not make the goal twice
+// — so the dialog keeps the goal's id, and the next press rewrites that goal
+// with what the form says now, making it only if the hub has no such goal
+// (the first write never landed, or the goal was deleted meanwhile).
+async function insertOnce(form, insert, rewrite) {
+  const tried = form.dataset.rowId;
   const id = (form.dataset.rowId ??= crypto.randomUUID());
-  if (!form.dataset.rowSaved) { await insert(id); form.dataset.rowSaved = "1"; }
+  if (!tried || (await rewrite(id)).changed === 0) await insert(id);
   return id;
 }
 // What follows a save that landed: a failed re-read is not a failed save, so
@@ -456,13 +470,23 @@ window.submitAddAccount = async function() {
   if (!form) return;
   try {
     const now = new Date().toISOString();
-    const id = await insertOnce(form, (id) =>
-      db(`INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, ?)`, [id, name, category, type, now]));
+    // One batch: the account and its opening value land together or not at
+    // all, so a second press writes what the form says then. The ids stay the
+    // dialog's own: a save that landed unheard cannot be made twice.
+    const id = (form.dataset.rowId ??= crypto.randomUUID());
+    const statements = [{
+      sql: `INSERT INTO app_nest_egg__accounts (id, name, category, type, created_at) VALUES (?, ?, ?, ?, ?)`,
+      params: [id, name, category, type, now],
+    }];
     if (cents > 0) {
-      await db(`INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
-        [crypto.randomUUID(), id, cents, ME?.id ?? "system", now]);
+      statements.push({
+        sql: `INSERT INTO app_nest_egg__account_snapshots (id, account_id, value_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
+        params: [(form.dataset.snapId ??= crypto.randomUUID()), id, cents, ME?.id ?? "system", now],
+      });
     }
-  } catch {
+    await dbBatch(statements);
+  } catch (e) {
+    console.error(e);
     return saveRefused(form);
   }
   await afterSave();
@@ -563,13 +587,21 @@ window.submitAddFund = async function() {
   if (!form) return;
   try {
     const now = new Date().toISOString();
-    const id = await insertOnce(form, (id) =>
-      db(`INSERT INTO app_nest_egg__funds (id, name, target_cents, created_at) VALUES (?, ?, ?, ?)`, [id, name, targetCents, now]));
+    // One batch, as for an account: the fund and its opening balance together.
+    const id = (form.dataset.rowId ??= crypto.randomUUID());
+    const statements = [{
+      sql: `INSERT INTO app_nest_egg__funds (id, name, target_cents, created_at) VALUES (?, ?, ?, ?)`,
+      params: [id, name, targetCents, now],
+    }];
     if (balCents > 0) {
-      await db(`INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
-        [crypto.randomUUID(), id, balCents, ME?.id ?? "system", now]);
+      statements.push({
+        sql: `INSERT INTO app_nest_egg__fund_snapshots (id, fund_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
+        params: [(form.dataset.snapId ??= crypto.randomUUID()), id, balCents, ME?.id ?? "system", now],
+      });
     }
-  } catch {
+    await dbBatch(statements);
+  } catch (e) {
+    console.error(e);
     return saveRefused(form);
   }
   await afterSave();
@@ -711,12 +743,16 @@ window.submitAddGoal = async function() {
     const now = new Date().toISOString();
     const id = await insertOnce(form, (id) =>
       db(`INSERT INTO app_nest_egg__savings_goals (id, member_id, name, target_cents, target_date, visibility, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [id, memberId, name, targetCents, targetDate, visibility, now]));
+        [id, memberId, name, targetCents, targetDate, visibility, now]),
+      (id) =>
+        db(`UPDATE app_nest_egg__savings_goals SET member_id = ?, name = ?, target_cents = ?, target_date = ?, visibility = ?, created_at = ? WHERE id = ?`,
+          [memberId, name, targetCents, targetDate, visibility, now, id]));
     if (balCents > 0) {
       await db(`INSERT INTO app_nest_egg__goal_snapshots (id, goal_id, balance_cents, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
         [crypto.randomUUID(), id, balCents, ME?.id ?? "system", now]);
     }
-  } catch {
+  } catch (e) {
+    console.error(e);
     return saveRefused(form);
   }
   await afterSave();
