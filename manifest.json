@@ -92,6 +92,5 @@
   },
   "nav": { "label": "Nest Egg" },
   "widget": { "label": "Nest Egg", "size": "small" },
-  "resource_limits": { "max_db_bytes": 104857600 },
   "icon": "🪺"
 }
