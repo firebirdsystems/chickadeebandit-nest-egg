@@ -213,6 +213,12 @@ describe("outcomeUnknown", () => {
     expect(outcomeUnknown(undefined)).toBe(true);
   });
 
+  it("is true for a server failure, which may have come after the write", () => {
+    for (const status of [500, 503]) {
+      expect(outcomeUnknown(Object.assign(new Error("x"), { status }))).toBe(true);
+    }
+  });
+
   it("is false for a clean refusal", () => {
     for (const status of [403, 409, 507]) {
       expect(outcomeUnknown(Object.assign(new Error("x"), { status }))).toBe(false);

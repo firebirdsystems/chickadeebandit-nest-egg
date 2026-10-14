@@ -217,11 +217,12 @@ export function canEditGoal(goal, member, tenant) {
  * Whether a failed write may nonetheless have been stored. A request that
  * threw before any answer carries no status, and the hub answers 400 both for
  * a write that timed out after it was stored and for a second press that met
- * the first one's row. Any other status is taken as a refusal that stored
+ * the first one's row. A 5xx is the hub failing on its side, possibly after
+ * the write was stored. Any other status is taken as a refusal that stored
  * nothing (403, 507, a batch's 409).
  */
 export function outcomeUnknown(e) {
-  return e?.status == null || e.status === 400;
+  return e?.status == null || e.status === 400 || (e.status >= 500 && e.status !== 507);
 }
 
 /**
