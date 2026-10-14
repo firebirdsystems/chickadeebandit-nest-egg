@@ -6,6 +6,7 @@ import {
   latestOf, priorOf, calcTrend,
   buildNetWorthHistory, sortFunds,
   supervisesGoals, assignsGoalOwner, goalOwnerChoices, canEditGoal,
+  outcomeUnknown, storedDiffers,
 } from "../src/logic.js";
 
 describe("category helpers", () => {
@@ -202,5 +203,34 @@ describe("who may write savings goals", () => {
     expect(canEditGoal(theirs, adult, coparent)).toBe(true);
     expect(canEditGoal({ id: "g3", member_id: "c1" }, child)).toBe(false);
     expect(canEditGoal(mine, null)).toBe(false);
+  });
+});
+
+describe("outcomeUnknown", () => {
+  it("is true for a request that threw with no answer, and for a 400", () => {
+    expect(outcomeUnknown(new TypeError("Failed to fetch"))).toBe(true);
+    expect(outcomeUnknown(Object.assign(new Error("x"), { status: 400 }))).toBe(true);
+    expect(outcomeUnknown(undefined)).toBe(true);
+  });
+
+  it("is false for a clean refusal", () => {
+    for (const status of [403, 409, 507]) {
+      expect(outcomeUnknown(Object.assign(new Error("x"), { status }))).toBe(false);
+    }
+  });
+});
+
+describe("storedDiffers", () => {
+  const row = { id: "g1", name: "Bike", target_cents: 25000, target_date: null, created_at: "t" };
+
+  it("is false when the form's columns match, whatever else the row holds", () => {
+    expect(storedDiffers(row, { name: "Bike", target_cents: 25000, target_date: null })).toBe(false);
+    expect(storedDiffers({ name: "Bike" }, { name: "Bike", target_date: null })).toBe(false);
+  });
+
+  it("is true when any of the form's columns changed", () => {
+    expect(storedDiffers(row, { name: "Trike", target_cents: 25000 })).toBe(true);
+    expect(storedDiffers(row, { name: "Bike", target_cents: 30000 })).toBe(true);
+    expect(storedDiffers(row, { name: "Bike", target_date: "2030-01-01" })).toBe(true);
   });
 });

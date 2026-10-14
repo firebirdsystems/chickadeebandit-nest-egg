@@ -158,7 +158,7 @@ import {
   fmtMonthYear, fmtDate,
   latestOf, buildNetWorthHistory,
   categoryGlyph, categoryLabel,
-  sortFunds,
+  sortFunds, outcomeUnknown, storedDiffers,
   assignsGoalOwner, goalOwnerChoices, canEditGoal,
 } from "./logic.js";
 
@@ -191,7 +191,7 @@ async function db(sql, params = []) {
   const json = await res.json().catch(() => null);
   // A refusal is an answer too: read as a success, a write the hub turned
   // down would look as though it had been saved.
-  if (!res.ok || !json || typeof json !== "object" || json.error) throw new Error(json?.error || "That could not be saved");
+  if (!res.ok || !json || typeof json !== "object" || json.error) throw Object.assign(new Error(json?.error || "That could not be saved"), { status: res.status });
   return json;
 }
 
@@ -201,7 +201,7 @@ async function dbBatch(statements) {
   if (!DB || !statements.length) return [];
   const res = await fetch(DB, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ statements }) });
   const json = await res.json().catch(() => null);
-  if (!res.ok || !json || typeof json !== "object" || json.error) throw new Error(json?.error || "That could not be saved");
+  if (!res.ok || !json || typeof json !== "object" || json.error) throw Object.assign(new Error(json?.error || "That could not be saved"), { status: res.status });
   return json.results ?? [];
 }
 
@@ -398,6 +398,40 @@ async function afterSave() {
   catch (e) { showError(e); }
 }
 
+// A create whose answer never came, or whose second press met its own row, may
+// have landed: the row is looked up by the id the dialog kept. null: it is not
+// there, or could not be read, and the save is refused as before. Otherwise
+// the save is done and the answer is a line to show ("" for none): what the
+// form holds now is compared with what was stored, a changed amount is
+// recorded the way Update records one, and anything else stays as stored.
+const SAVED_AS_FIRST = "Saved as first entered — check it and update what changed.";
+async function landedUnheard(form, e, { table, fields, snaps, fk, col, cents }) {
+  const { rowId, snapId } = form.dataset;
+  if (!rowId || !outcomeUnknown(e)) return null;
+  let row, snap;
+  try {
+    row = (await db(`SELECT * FROM ${table} WHERE id = ?`, [rowId])).rows?.[0];
+    if (!row) return null;
+    snap = snapId ? (await db(`SELECT * FROM ${snaps} WHERE id = ?`, [snapId])).rows?.[0] : null;
+  } catch { return null; }
+  let unapplied = storedDiffers(row, fields);
+  // Only the amount changed: record it. With other columns changed too, the
+  // new amount may be meant for something else, so nothing more is written.
+  if ((snap?.[col] ?? 0) !== cents) {
+    if (!unapplied) try {
+      await db(`INSERT INTO ${snaps} (id, ${fk}, ${col}, note, recorded_by, recorded_at) VALUES (?, ?, ?, '', ?, ?)`,
+        [crypto.randomUUID(), rowId, cents, ME?.id ?? "system", new Date().toISOString()]);
+    } catch (err) { console.error(err); unapplied = true; }
+    else unapplied = true;
+  }
+  return unapplied ? SAVED_AS_FIRST : "";
+}
+// The success path of a create, with the line landedUnheard answered, if any.
+async function afterCreate(note) {
+  await afterSave();
+  if (note) showError(new Error(note));
+}
+
 // ── Account actions ───────────────────────────────────────────────────────────
 function assetCategoryOptions(selected) {
   return ["home","investment","savings","checking","vehicle","other_asset"]
@@ -456,6 +490,7 @@ window.submitAddAccount = async function() {
 
   const form = saveBegin("Adding…");
   if (!form) return;
+  let note = "";
   try {
     const now = new Date().toISOString();
     // One batch: the account and its opening value land together or not at
@@ -475,9 +510,11 @@ window.submitAddAccount = async function() {
     await dbBatch(statements);
   } catch (e) {
     console.error(e);
-    return saveRefused(form);
+    note = await landedUnheard(form, e, { table: "app_nest_egg__accounts", fields: { name, category, type },
+      snaps: "app_nest_egg__account_snapshots", fk: "account_id", col: "value_cents", cents });
+    if (note === null) return saveRefused(form);
   }
-  await afterSave();
+  await afterCreate(note);
 };
 
 function openUpdateAccountModal(acctId) {
@@ -573,6 +610,7 @@ window.submitAddFund = async function() {
   const targetCents = isNaN(rawTarget) || rawTarget <= 0 ? null : Math.round(rawTarget * 100);
   const form = saveBegin("Adding…");
   if (!form) return;
+  let note = "";
   try {
     const now = new Date().toISOString();
     // One batch, as for an account: the fund and its opening balance together.
@@ -590,9 +628,11 @@ window.submitAddFund = async function() {
     await dbBatch(statements);
   } catch (e) {
     console.error(e);
-    return saveRefused(form);
+    note = await landedUnheard(form, e, { table: "app_nest_egg__funds", fields: { name, target_cents: targetCents },
+      snaps: "app_nest_egg__fund_snapshots", fk: "fund_id", col: "balance_cents", cents: balCents });
+    if (note === null) return saveRefused(form);
   }
-  await afterSave();
+  await afterCreate(note);
 };
 
 function openUpdateFundModal(fundId) {
@@ -727,6 +767,7 @@ window.submitAddGoal = async function() {
   const targetCents = Math.round(rawTarget * 100);
   const form = saveBegin("Adding…");
   if (!form) return;
+  let note = "";
   try {
     const now = new Date().toISOString();
     // One batch, as for an account: the goal and its starting balance
@@ -745,9 +786,12 @@ window.submitAddGoal = async function() {
     await dbBatch(statements);
   } catch (e) {
     console.error(e);
-    return saveRefused(form);
+    note = await landedUnheard(form, e, { table: "app_nest_egg__savings_goals",
+      fields: { member_id: memberId, name, target_cents: targetCents, target_date: targetDate, visibility },
+      snaps: "app_nest_egg__goal_snapshots", fk: "goal_id", col: "balance_cents", cents: balCents });
+    if (note === null) return saveRefused(form);
   }
-  await afterSave();
+  await afterCreate(note);
 };
 
 function openUpdateGoalModal(goalId) {

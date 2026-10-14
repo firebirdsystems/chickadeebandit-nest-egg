@@ -212,3 +212,22 @@ export function goalOwnerChoices(members, member, tenant) {
 export function canEditGoal(goal, member, tenant) {
   return isAdultMember(member) && (goal.member_id === member.id || supervisesGoals(member, tenant));
 }
+
+/**
+ * Whether a failed write may nonetheless have been stored. A request that
+ * threw before any answer carries no status, and the hub answers 400 both for
+ * a write that timed out after it was stored and for a second press that met
+ * the first one's row. Any other status is taken as a refusal that stored
+ * nothing (403, 507, a batch's 409).
+ */
+export function outcomeUnknown(e) {
+  return e?.status == null || e.status === 400;
+}
+
+/**
+ * Whether a stored row differs from what a form holds now, over the form's
+ * own columns only. An empty value and a missing one are the same.
+ */
+export function storedDiffers(row, fields) {
+  return Object.keys(fields).some(k => (row?.[k] ?? null) !== (fields[k] ?? null));
+}
